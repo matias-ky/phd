@@ -1,2 +1,2 @@
-# PhD
-All works related to my PhD!
+# phd
+All works related to my PhD.
