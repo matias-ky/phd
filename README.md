@@ -1,2 +1,2 @@
 # PhD
-All works related to my PhD! Coming soon!
+All works related to my PhD! Coming soon.
