@@ -2,7 +2,7 @@
 All works related to my PhD. Coming soon...
 
 <details>
-<summary>Setting Up a Virtual Environment for Linux</summary>
+<summary><b>Setting Up a Virtual Environment for Linux</b></summary>
 
 Follow these steps to set up a virtual environment for running the project:
 
