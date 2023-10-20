@@ -1,5 +1,19 @@
 # PhD
-All works related to my PhD. Coming soon!
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+This project is a code implementation of my PhD research in physics. The project aims to advance our understanding of solar phenomena, specifically focusing on the dynamic processes underlying solar flares. The code is written in Python and is designed to be efficient, modular, and easy to extend. It leverages specialized numerical techniques to provide a powerful computational platform for modeling and simulating these events, contributing to the broader field of space weather research and astrophysics.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+## Installation
 
 <details>
 <summary><b>Setting Up a Virtual Environment for Linux</b></summary>
@@ -52,3 +66,7 @@ Now your virtual environment is set up and ready to run the project. Enjoy codin
 Note: Make sure to replace `project-env` and `virtual-environment` with appropriate names for your project.
 
 </details>
+
+## Usage
+
+Coming soon!
