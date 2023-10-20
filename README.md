@@ -1,5 +1,5 @@
 # PhD
-All works related to my PhD. Coming soon...
+All works related to my PhD. Coming soon!
 
 <details>
 <summary><b>Setting Up a Virtual Environment for Linux</b></summary>
