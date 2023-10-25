@@ -37,7 +37,7 @@ def set_seed(seed):
 
 
 @jit(nopython=True)
-def cellular_automaton_lu_ham_standard(B, N, Zc, iterations):
+def lu_ham_standard(B, N, Zc, iterations):
     """
     Apply cellular automaton rules to a grid.
 
@@ -75,7 +75,7 @@ def cellular_automaton_lu_ham_standard(B, N, Zc, iterations):
     Examples
     --------
     >>> initial_grid = np.zeros((10, 10), dtype=np.float32)
-    >>> energy_list, total_energy_list, final_grid, grid_states, area_states = cellular_automaton(initial_grid)
+    >>> energy_list, total_energy_list, final_grid, grid_states, area_states = cellular_automaton(initial_grid, N=62, Zc=1, iterations=1000)
     """
 
     C = np.zeros((N+2, N+2), dtype=np.float32)  # Initialize C matrix
@@ -146,3 +146,101 @@ def cellular_automaton_lu_ham_standard(B, N, Zc, iterations):
     del area_list[0]  # Delete initial area from the list
 
     return e_lib, e_tot, B, grid_list, area_list  # Return the lists and final grid
+
+
+@jit(nopython=True)
+# TODO: Revise 'g' redistribution formula.
+def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
+    """
+    Apply cellular automaton rules to a grid for a deterministic global parameter model.
+
+    Parameters
+    ----------
+    B : numpy.ndarray
+        Initial grid.
+    Z_c : float
+        Parameter for Z_c extraction.
+    N_i : int
+        Number of iterations.
+    eps : float
+        Global redistribution parameter.
+    D_nc : float
+        Non-conservative redistribution parameter.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - e_lib : List of normalized energy values at each iteration.
+            - e_tot : List of total energy values at each iteration.
+            - final_grid : numpy.ndarray : Final grid state.
+            - grid_states : List of grid states at each iteration.
+            - area_states : List of corresponding area states.
+
+    Notes
+    -----
+    This function applies cellular automaton rules to a grid represented by
+    matrix `B` based on a deterministic global parameter model. It iterates for a specified
+    number of times (`N_i`) and updates the grid state according to the specified rules.
+
+    Examples
+    --------
+    >>> initial_grid = np.zeros((10, 10), dtype=np.float32)
+    >>> energy_list, total_energy_list, final_grid, grid_states, area_states = lu_ham_deterministic(initial_grid, Z_c=1, N_i=1000, eps=0.1, D_nc=0.2)
+    """
+
+    N = len(B)
+    C = np.zeros((N, N))
+    M = np.zeros((N+2, N+2), dtype=np.float32)
+    e_0 = 4*(Z_c**2)/5
+    e_lib = []  # List to store normalized energy values in each collapse
+    e_tot = []  # List to store total energy values
+    grid_states = [B]  # List to store grid states
+    area_states = [B]  # List to store area states
+
+    for k in range(N_i):
+        e = 0
+        Z = np.empty((N, N))
+        r_0 = random.uniform(D_nc, 1)
+
+        for i in range(1, N-1):  # Non-conservative redistribution
+            for j in range(1, N-1):
+                Z[i, j] = B[i, j] - \
+                    (1/4)*(B[i-1, j]+B[i, j-1]+B[i+1, j]+B[i, j+1])
+                if abs(Z[i, j]) > Z_c:
+                    C[i, j] = C[i, j]-(4/5)*Z_c
+                    C[i-1, j] = C[i-1, j]+(r_0/5)*Z_c
+                    C[i+1, j] = C[i+1, j]+(r_0/5)*Z_c
+                    C[i, j-1] = C[i, j-1]+(r_0/5)*Z_c
+                    C[i, j+1] = C[i, j+1]+(r_0/5)*Z_c
+                    M[i, j] = 1
+                    M[i+1, j] = 1
+                    M[i-1, j] = 1
+                    M[i, j+1] = 1
+                    M[i, j-1] = 1
+
+                    B_ii = B[i-1, j]+B[i, j-1]+B[i+1, j]+B[i, j+1]
+                    g = -(4/5)*(((B_ii/2)*r_0/Z_c) + ((r_0**2)/5) -
+                                (2*B[i, j]/Z_c) + 4/5)*(Z_c**2)
+                    e = e+g
+
+        if e > 0:  # If there was a collapse e>0, then update.
+            for i in range(1, N-1):
+                for j in range(1, N-1):
+                    B[i, j] = B[i, j]+C[i, j]  # Update the field
+                    C[i, j] = 0
+        else:  # Global Driving
+            for i in range(1, N-1):  # Redistribution
+                for j in range(1, N-1):
+                    B[i, j] = B[i, j]*(1+eps)
+
+        e_lib.append(e/e_0)
+        e_tot.append(np.sum(np.square(B)))
+        grid_states.append(B.copy())
+        area_states.append(M)
+        M = np.zeros((N+2, N+2), dtype=np.float32)
+
+    del grid_states[0]
+    del area_states[0]
+    # Return the lists and final grid
+    return e_lib, e_tot, B, grid_states, area_states
