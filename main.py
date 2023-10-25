@@ -2,6 +2,7 @@
 
 # Import necessary libraries and functions
 from libs.functions import *
+from libs.areas import *
 import numpy as np
 from time import time
 import os
@@ -21,7 +22,7 @@ iterations = 1
 _, _, _, _, _ = lu_ham_standard(
     B_N62, N, Zc, iterations)
 _, _, _, _, _ = lu_ham_deterministic(
-    B, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
+    B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
 
 # Run simulation with increased iterations
 iterations = 10000
@@ -35,5 +36,12 @@ print("--- %s seconds ---" % (time() - start_time))
 # Deterministic
 start_time = time()
 e_lib_det, e_tot_det, B_det, grid_list_det, area_list_det = lu_ham_deterministic(
-    B, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
+    B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
 print("--- %s seconds ---" % (time() - start_time))
+
+# Avalanche active distribution nodes
+total_avalanche_areas, per_avalanche_areas = avalanche_areas_func(
+    area_list_st)
+
+total_avalanche_areas, per_avalanche_areas = avalanche_areas_func(
+    area_list_det)
