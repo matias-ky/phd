@@ -7,6 +7,9 @@ import numpy as np
 from time import time
 import os
 
+# Sets the program seed for consistency
+set_seed(7)
+
 # Load data for N = 62
 current_directory = os.getcwd()
 data_N62 = np.load(current_directory + "/B_final_N62_Zc1.npz")
