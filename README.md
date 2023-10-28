@@ -69,4 +69,4 @@ Note: Make sure to replace `project-env` and `virtual-environment` with appropri
 
 ## Usage
 
-Coming soon...
+Coming soon!
