@@ -30,13 +30,13 @@ _, _, _, _, _ = lu_ham_deterministic(
 # Run simulation with increased iterations
 iterations = 10000
 
-# Standard
+# Standard simulation
 start_time = time()
 e_lib_st, e_tot_st, B_st, grid_list_st, area_list_st = lu_ham_standard(
     B_N62, N, Zc, iterations)
 print("--- %s seconds ---" % (time() - start_time))
 
-# Deterministic
+# Deterministic simulation
 start_time = time()
 e_lib_det, e_tot_det, B_det, grid_list_det, area_list_det = lu_ham_deterministic(
     B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
