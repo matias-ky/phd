@@ -61,7 +61,7 @@ Follow these steps to set up a virtual environment for running the project:
     pip list --local
     ```
 
-Now your virtual environment is set up and ready to run the project. Enjoy coding!
+Now your virtual environment is set up and ready to run the project.
 
 Note: Make sure to replace `project-env` and `virtual-environment` with appropriate names for your project.
 
