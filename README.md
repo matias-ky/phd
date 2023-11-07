@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-This project is a code implementation of my PhD research in physics. The project aims to advance our understanding of solar phenomena, specifically focusing on the dynamic processes underlying solar flares. The code is written in Python and is designed to be efficient, modular, and easy to extend. It leverages specialized numerical techniques to provide a powerful computational platform for modeling and simulating these events, contributing to the broader field of space weather research and astrophysics.
+This project is a code implementation of my PhD research in physics. The project aims to advance our understanding of solar phenomena, focusing on the dynamic processes underlying solar flares. The code is written in Python and is designed to be efficient, modular, and easy to extend. It leverages specialized numerical techniques to provide a powerful computational platform for modeling and simulating these events, contributing to the broader field of space weather research and astrophysics.
 
 ## Table of Contents
 
