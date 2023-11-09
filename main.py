@@ -7,7 +7,7 @@ import numpy as np
 from time import time
 import os
 
-# Sets the program seed for consistency over the simulations
+# Set the program seed for consistency over the simulations
 set_seed(7)
 
 # Load data for N = 62
