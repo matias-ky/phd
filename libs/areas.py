@@ -1,5 +1,6 @@
 
 from numba import njit, prange
+from numba.typed import List
 import numpy as np
 from scipy.sparse import csr_matrix
 from skimage import measure

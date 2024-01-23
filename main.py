@@ -43,8 +43,43 @@ e_lib_det, e_tot_det, B_det, grid_list_det, area_list_det = lu_ham_deterministic
 print("--- %s seconds ---" % (time() - start_time))
 
 # Avalanche active distribution nodes
-total_avalanche_areas, per_avalanche_areas = avalanche_areas_func(
+total_avalanche_areas_st, per_avalanche_areas_st = avalanche_areas_func(
     area_list_st)
 
-total_avalanche_areas, per_avalanche_areas = avalanche_areas_func(
+total_avalanche_areas_det, per_avalanche_areas_det = avalanche_areas_func(
     area_list_det)
+
+# Avalanche covered areas as the sum of active nodes
+avalanche_covered_areas_st = calculate_covered_areas(
+    List(total_avalanche_areas_st))
+
+avalanche_covered_areas_det = calculate_covered_areas(
+    List(total_avalanche_areas_det))
+
+# Number of active nodes per avalanche
+number_of_nodes_per_avalanche_st = node_count_in_avalanche(
+    per_avalanche_areas_st)
+
+number_of_nodes_per_avalanche_det = node_count_in_avalanche(
+    per_avalanche_areas_det)
+
+# Cluster in avalanche areas
+cluster_list_st = [csr_matrix(measure.label(
+    avalanche_area > 0)) for avalanche_area in total_avalanche_areas_st]
+
+cluster_list_det = [csr_matrix(measure.label(
+    avalanche_area > 0)) for avalanche_area in total_avalanche_areas_det]
+
+# Number of clusters per avalanche areas
+number_of_clusters_st = [cluster_matrix.max()
+                         for cluster_matrix in cluster_list_st]
+
+number_of_clusters_det = [cluster_matrix.max()
+                          for cluster_matrix in cluster_list_det]
+
+# Cluster sizes for all avalanches
+cluster_sizes_st = [item for cluster_matrix in cluster_list_st for item in np.unique(cluster_matrix.data, return_counts=True)[
+    1][0:cluster_matrix.max()]]
+
+cluster_sizes_det = [item for cluster_matrix in cluster_list_det for item in np.unique(cluster_matrix.data, return_counts=True)[
+    1][0:cluster_matrix.max()]]
