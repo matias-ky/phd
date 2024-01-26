@@ -179,6 +179,25 @@ def node_count_in_avalanche(avalanche_areas_per_avalanche):
     return node_counts_in_avalanches
 
 
+# Not necesarily this gets the peak of the avalanche. Have to use index of P.
+def node_count_in_avalanches_peak(avalanche_areas_per_avalanche):
+    """
+    Calculate the number of nodes at the peak of each avalanche.
+    """
+
+    number_of_nodes_at_peak = []
+
+    for i in range(len(avalanche_areas_per_avalanche)):
+        max_nodes = 0
+        for matrices in avalanche_areas_per_avalanche[i]:
+            nodes = np.count_nonzero(np.array(matrices))
+            if nodes > max_nodes:
+                max_nodes = nodes
+        number_of_nodes_at_peak.append(max_nodes)
+
+    return number_of_nodes_at_peak
+
+
 def unstable_nodes_before_avalanche(unstable_grids, e_lib):
     """
     Identify unstable nodes before an avalanche.

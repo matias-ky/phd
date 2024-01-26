@@ -16,7 +16,7 @@ set_seed(7)
 # %%
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/B_final_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/phd/B_final_N62_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
@@ -104,4 +104,20 @@ distribution_plot(xe, ye, fit_ye, "A",
 
 xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_det)
 distribution_plot(xe, ye, fit_ye, "A",
+                  scale="log", fit=False, save=False)
+
+# %%
+# Number of nodes at the avalanche peak
+number_of_nodes_at_peak_st = node_count_in_avalanches_peak(per_avalanche_areas_st)
+
+number_of_nodes_at_peak_det = node_count_in_avalanches_peak(per_avalanche_areas_det)
+
+# %%
+# A*
+xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_st)
+distribution_plot(xe, ye, fit_ye, "A^{*}",
+                  scale="log", fit=False, save=False)
+
+xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_det)
+distribution_plot(xe, ye, fit_ye, "A^{*}",
                   scale="log", fit=False, save=False)
