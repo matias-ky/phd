@@ -70,6 +70,7 @@ def distribution_to_plot(E, normal=False):
         _, cov = np.polyfit(xe_log[2:20], ye_log[2:20], 1, cov=True)
         me_error, be_error = np.sqrt(np.diag(cov))
         fit = np.poly1d([me, be])
+        print(f"The power-law exponent is {me} and error is {me_error}")
 
     fit_ye = []
     if not normal:

@@ -16,7 +16,7 @@ set_seed(7)
 # %%
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/phd/B_final_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/B_final_N62_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
@@ -97,14 +97,16 @@ cluster_sizes_det = [item for cluster_matrix in cluster_list_det for item in np.
     1][0:cluster_matrix.max()]]
 
 # %%
+fit=True
+
 # A
 xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_st)
 distribution_plot(xe, ye, fit_ye, "A",
-                  scale="log", fit=False, save=False)
+                  scale="log", fit=fit, save=False)
 
 xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_det)
 distribution_plot(xe, ye, fit_ye, "A",
-                  scale="log", fit=False, save=False)
+                  scale="log", fit=fit, save=False)
 
 # %%
 # Number of nodes at the avalanche peak
@@ -116,8 +118,39 @@ number_of_nodes_at_peak_det = node_count_in_avalanches_peak(per_avalanche_areas_
 # A*
 xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_st)
 distribution_plot(xe, ye, fit_ye, "A^{*}",
-                  scale="log", fit=False, save=False)
+                  scale="log", fit=fit, save=False)
 
 xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_det)
 distribution_plot(xe, ye, fit_ye, "A^{*}",
-                  scale="log", fit=False, save=False)
+                  scale="log", fit=fit, save=False)
+
+# %%
+# D (fractal index)
+fractal_index_st = []
+for matrix in total_avalanche_areas_st:
+    fractal_index_st.append(fractal_index(matrix))
+
+plt.hist(fractal_index_st, bins=20, density=False)
+plt.xlabel(r"$"+"D_{st}"+"$", size=20)
+plt.ylabel(r"PDF($"+"D_{st}"+"$)", size=20)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.grid(c='black', alpha=0.3)
+plt.show()
+
+print("Mean Fractal Index St: " + str(np.mean(fractal_index_st)))
+
+fractal_index_det = []
+for matrix in total_avalanche_areas_det:
+    fractal_index_det.append(fractal_index(matrix))
+
+plt.hist(fractal_index_det, bins=20, density=False)
+plt.xlabel(r"$"+"D_{det}"+"$", size=20)
+plt.ylabel(r"PDF($"+"D_{det}"+"$)", size=20)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.grid(c='black', alpha=0.3)
+plt.show()
+
+print("Mean Fractal Index det: " + str(np.mean(fractal_index_st)))
+# %%

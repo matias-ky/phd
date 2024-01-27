@@ -292,3 +292,50 @@ def number_of_clusters(total_cluster_list):
                        for cluster_matrix in total_cluster_list]
 
     return cluster_numbers
+
+
+def fractal_index(matrix):
+    """
+    Calculate the fractal index of a matrix using the box-counting method.
+
+    Parameters:
+    - matrix: 2D numpy array
+
+    Returns:
+    - fractal_index: float
+    """
+
+    # Ensure the input matrix is a 2D numpy array
+    if not isinstance(matrix, np.ndarray) or matrix.ndim != 2:
+        raise ValueError("Input must be a 2D numpy array.")
+
+    # Convert the matrix to binary (0s and 1s)
+    binary_matrix = (matrix != 0).astype(int)
+
+    # Get the dimensions of the matrix
+    rows, cols = matrix.shape
+
+    # Find the maximum side length for the boxes
+    max_side_length = min(rows, cols)
+
+    # Initialize the box size and count
+    box_size = max_side_length
+    box_count = 0
+
+    while box_size >= 1:
+        for i in range(0, rows, box_size):
+            for j in range(0, cols, box_size):
+                # Check if the box contains any '1's (non-zero elements)
+                if np.any(binary_matrix[i:i+box_size, j:j+box_size]):
+                    box_count += 1
+
+        # Halve the box size for the next iteration
+        box_size //= 2
+
+    # Calculate the fractal dimension using the box-counting formula
+    fractal_dimension = np.log(box_count) / np.log(max_side_length)
+
+    # The fractal index is the complement of the fractal dimension
+    fractal_index = 2.0 - fractal_dimension
+
+    return fractal_index
