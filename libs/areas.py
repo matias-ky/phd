@@ -106,7 +106,46 @@ def avalanche_areas_func(area_list):
     return total_avalanche_areas, per_avalanche_areas
 
 
-@njit
+# @njit
+# def calculate_covered_areas(avalanche_areas):
+#     """
+#     Calculate covered areas from a list of avalanche areas matrices.
+
+#     Parameters
+#     ----------
+#     avalanche_areas : list of numpy.ndarray
+#         List of avalanche areas matrices.
+
+#     Returns
+#     -------
+#     list
+#         List of covered areas.
+
+#     Notes
+#     -----
+#     This function processes a list of avalanche areas matrices and calculates
+#     the covered areas for each matrix.
+
+#     Examples
+#     --------
+#     >>> area_list = [np.zeros((10, 10), dtype=np.float32)]
+#     >>> covered_areas = calculate_covered_areas(area_list)
+#     """
+
+#     covered_areas = []
+
+#     for matrix in avalanche_areas:
+#         area = 0
+#         for i in range(len(matrix)):
+#             for j in range(len(matrix)):
+#                 if matrix[i][j] != 0:
+#                     area += 1
+#         covered_areas.append(area)
+
+#     return covered_areas
+
+
+# @njit
 def calculate_covered_areas(avalanche_areas):
     """
     Calculate covered areas from a list of avalanche areas matrices.
@@ -135,11 +174,7 @@ def calculate_covered_areas(avalanche_areas):
     covered_areas = []
 
     for matrix in avalanche_areas:
-        area = 0
-        for i in range(len(matrix)):
-            for j in range(len(matrix)):
-                if matrix[i][j] != 0:
-                    area += 1
+        area = np.count_nonzero(np.array(matrix))
         covered_areas.append(area)
 
     return covered_areas
@@ -294,48 +329,104 @@ def number_of_clusters(total_cluster_list):
     return cluster_numbers
 
 
+# def fractal_index(matrix):
+#     """
+#     Calculate the fractal index of a matrix using the box-counting method.
+
+#     Parameters:
+#     - matrix: 2D numpy array
+
+#     Returns:
+#     - fractal_index: float
+#     """
+
+#     # Ensure the input matrix is a 2D numpy array
+#     if not isinstance(matrix, np.ndarray) or matrix.ndim != 2:
+#         raise ValueError("Input must be a 2D numpy array.")
+
+#     # Convert the matrix to binary (0s and 1s)
+#     binary_matrix = (matrix != 0).astype(int)
+
+#     # Get the dimensions of the matrix
+#     rows, cols = matrix.shape
+
+#     # Find the maximum side length for the boxes
+#     max_side_length = min(rows, cols)
+
+#     # Initialize the box size and count
+#     box_size = max_side_length
+#     box_count = 0
+
+#     while box_size >= 1:
+#         for i in range(0, rows, box_size):
+#             for j in range(0, cols, box_size):
+#                 # Check if the box contains any '1's (non-zero elements)
+#                 if np.any(binary_matrix[i:i+box_size, j:j+box_size]):
+#                     box_count += 1
+
+#         # Halve the box size for the next iteration
+#         box_size //= 2
+
+#     # Calculate the fractal dimension using the box-counting formula
+#     fractal_dimension = np.log(box_count) / np.log(max_side_length)
+
+#     # The fractal index is the complement of the fractal dimension
+#     fractal_index = 2.0 - fractal_dimension
+
+#     return fractal_index
+
+# TODO: Revise correct formula for fractal dimension/index.
 def fractal_index(matrix):
-    """
-    Calculate the fractal index of a matrix using the box-counting method.
+    def count_non_empty_boxes(box_size):
+        count = 0
+        rows, cols = matrix.shape
 
-    Parameters:
-    - matrix: 2D numpy array
-
-    Returns:
-    - fractal_index: float
-    """
-
-    # Ensure the input matrix is a 2D numpy array
-    if not isinstance(matrix, np.ndarray) or matrix.ndim != 2:
-        raise ValueError("Input must be a 2D numpy array.")
-
-    # Convert the matrix to binary (0s and 1s)
-    binary_matrix = (matrix != 0).astype(int)
-
-    # Get the dimensions of the matrix
-    rows, cols = matrix.shape
-
-    # Find the maximum side length for the boxes
-    max_side_length = min(rows, cols)
-
-    # Initialize the box size and count
-    box_size = max_side_length
-    box_count = 0
-
-    while box_size >= 1:
+        # Iterate over the matrix with the specified box size
         for i in range(0, rows, box_size):
             for j in range(0, cols, box_size):
-                # Check if the box contains any '1's (non-zero elements)
-                if np.any(binary_matrix[i:i+box_size, j:j+box_size]):
-                    box_count += 1
+                # Check if the box contains at least one filled pixel
+                if np.any(matrix[i:i+box_size, j:j+box_size]):
+                    count += 1
 
-        # Halve the box size for the next iteration
-        box_size //= 2
+        return count
 
-    # Calculate the fractal dimension using the box-counting formula
-    fractal_dimension = np.log(box_count) / np.log(max_side_length)
+    # Iterate over different box sizes
+    box_sizes = range(1, min(matrix.shape)//2)
+    counts = [count_non_empty_boxes(box_size) for box_size in box_sizes]
 
-    # The fractal index is the complement of the fractal dimension
-    fractal_index = 2.0 - fractal_dimension
+    # Fit a linear regression to the data (log-log scale)
+    x = np.log(box_sizes)
+    y = np.log(counts)
 
-    return fractal_index
+    # Calculate the slope of the regression line, which corresponds to the fractal dimension
+    slope = np.polyfit(x, y, 1)[0]
+
+    # Fractal dimension is the negative of the slope
+    fractal_dimension = -slope
+
+    return fractal_dimension
+
+# def box_count(matrix, box_size):
+#     count = 0
+#     rows, cols = matrix.shape
+
+#     for i in range(0, rows, box_size):
+#         for j in range(0, cols, box_size):
+#             if np.any(matrix[i:i+box_size, j:j+box_size]):
+#                 count += 1
+
+#     return count
+
+# def fractal_index(matrix):
+#     sizes = 2**np.arange(1, int(min(np.log2(matrix.shape))) + 1)
+#     counts = []
+
+#     for size in sizes:
+#         count = box_count(matrix, size)
+#         counts.append(count)
+
+#     # Fit a linear regression to calculate the fractal dimension
+#     coeffs = np.polyfit(np.log(sizes), np.log(counts), 1)
+#     fractal_dimension = -coeffs[0]
+
+#     return fractal_dimension

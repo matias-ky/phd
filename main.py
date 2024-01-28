@@ -16,7 +16,7 @@ set_seed(7)
 # %%
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/B_final_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/phd/B_final_N62_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
@@ -58,11 +58,9 @@ total_avalanche_areas_det, per_avalanche_areas_det = avalanche_areas_func(
 
 # %%
 # Avalanche covered areas as the sum of active nodes
-avalanche_covered_areas_st = calculate_covered_areas(
-    List(total_avalanche_areas_st))
+avalanche_covered_areas_st = calculate_covered_areas(total_avalanche_areas_st)
 
-avalanche_covered_areas_det = calculate_covered_areas(
-    List(total_avalanche_areas_det))
+avalanche_covered_areas_det = calculate_covered_areas(total_avalanche_areas_det)
 
 # %%
 # Number of active nodes per avalanche
@@ -136,6 +134,7 @@ plt.ylabel(r"PDF($"+"D_{st}"+"$)", size=20)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.grid(c='black', alpha=0.3)
+plt.tight_layout()
 plt.show()
 
 print("Mean Fractal Index St: " + str(np.mean(fractal_index_st)))
@@ -150,7 +149,8 @@ plt.ylabel(r"PDF($"+"D_{det}"+"$)", size=20)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.grid(c='black', alpha=0.3)
+plt.tight_layout()
 plt.show()
 
-print("Mean Fractal Index det: " + str(np.mean(fractal_index_st)))
+print("Mean Fractal Index det: " + str(np.mean(fractal_index_det)))
 # %%

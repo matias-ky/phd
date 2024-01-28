@@ -149,7 +149,6 @@ def lu_ham_standard(B, N, Zc, iterations):
 
 
 @jit(nopython=True)
-# TODO: Revise 'g' redistribution formula.
 def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
     """
     Apply cellular automaton rules to a grid for a deterministic global parameter model.
@@ -200,14 +199,13 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
 
     for k in range(N_i):
         e = 0
-        Z = np.empty((N, N))
+        # Z = np.empty((N, N))
         r_0 = random.uniform(D_nc, 1)
 
         for i in range(1, N-1):  # Non-conservative redistribution
             for j in range(1, N-1):
-                Z[i, j] = B[i, j] - \
-                    (1/4)*(B[i-1, j]+B[i, j-1]+B[i+1, j]+B[i, j+1])
-                if abs(Z[i, j]) > Z_c:
+                Z = B[i, j] - (1/4)*(B[i-1, j]+B[i, j-1]+B[i+1, j]+B[i, j+1])
+                if abs(Z) > Z_c:
                     C[i, j] = C[i, j]-(4/5)*Z_c
                     C[i-1, j] = C[i-1, j]+(r_0/5)*Z_c
                     C[i+1, j] = C[i+1, j]+(r_0/5)*Z_c
@@ -219,9 +217,12 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
                     M[i, j+1] = 1
                     M[i, j-1] = 1
 
-                    B_ii = B[i-1, j]+B[i, j-1]+B[i+1, j]+B[i, j+1]
-                    g = -(4/5)*(((B_ii/2)*r_0/Z_c) + ((r_0**2)/5) -
-                                (2*B[i, j]/Z_c) + 4/5)*(Z_c**2)
+                    B_ii = B[i-1, j] + B[i, j-1] + B[i+1, j] + B[i, j+1]
+                    # g = -(4/5)*(((B_ii/2)*r_0/Z_c) + ((r_0**2)/5) - (2*B[i, j]/Z_c) + 4/5)*(Z_c**2)
+                    
+                    # There is a problem with B_ii but it is the correct formula
+                    abs_z = abs(Z)
+                    g = (4/5) * Z_c * ((2*abs_z/Z_c) - 1) * Z_c + ((1 - r_0)/(2*Z_c)) * B_ii + (1 - r_0**2)/5
                     e = e+g
 
         if e > 0:  # If there was a collapse e>0, then update.
