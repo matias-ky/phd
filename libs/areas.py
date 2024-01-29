@@ -4,7 +4,8 @@ from numba.typed import List
 import numpy as np
 from scipy.sparse import csr_matrix
 from skimage import measure
-
+import math
+from scipy.stats import linregress
 
 @njit
 def unstable_nodes(grid_list, Z_c, Z_c_percentage=0.8):
@@ -375,7 +376,20 @@ def number_of_clusters(total_cluster_list):
 
 #     return fractal_index
 
+@njit
+def linear_regression(x, y):
+    n = len(x)
+    sum_x = sum(x)
+    sum_y = sum(y)
+    sum_xy = sum(x * y)
+    sum_x_squared = sum(x * x)
+
+    slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x_squared - sum_x**2)
+
+    return slope
+
 # TODO: Revise correct formula for fractal dimension/index.
+@njit
 def fractal_index(matrix):
     def count_non_empty_boxes(box_size):
         count = 0
@@ -395,11 +409,16 @@ def fractal_index(matrix):
     counts = [count_non_empty_boxes(box_size) for box_size in box_sizes]
 
     # Fit a linear regression to the data (log-log scale)
-    x = np.log(box_sizes)
-    y = np.log(counts)
+    x = np.empty(len(box_sizes))
+    for i, box_size in enumerate(box_sizes):
+        x[i] = math.log(box_size)
 
-    # Calculate the slope of the regression line, which corresponds to the fractal dimension
-    slope = np.polyfit(x, y, 1)[0]
+    y = np.empty(len(counts))
+    for i, count in enumerate(counts):
+        y[i] = math.log(count)
+
+    # Fit a linear regression to the data (log-log scale)
+    slope = linear_regression(x, y)
 
     # Fractal dimension is the negative of the slope
     fractal_dimension = -slope
