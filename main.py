@@ -187,3 +187,15 @@ plt.show()
 
 print("Mean Fractal Index det: " + str(np.mean(fractal_index_det)))
 # %%
+
+# Lista con índices donde estan los 0 de e_soc.
+lim_a = np.where(np.array(e_lib_st) == 0)[0]
+
+start_time = time()
+T = duraciones(lim_a)
+print("duraciones1 Standard --- %s seconds ---" % (time() - start_time))
+
+start_time = time()
+E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado = energia_picos(lim_a, e_lib_st)
+print("E, P, tes --- %s seconds ---" % (time() - start_time))
+# %%

@@ -3,6 +3,7 @@
 # Here I will put the analysis functions
 
 import numpy as np
+from numba import jit, njit
 
 
 def distribution_to_plot(E, normal=False):
@@ -78,3 +79,50 @@ def distribution_to_plot(E, normal=False):
             fit_ye.append(np.exp(be)*(xe[i]**me))
 
     return xe, ye, fit_ye
+
+@jit(nopython=True)
+def duraciones(lim_a):
+    T = []
+    for i in range(len(lim_a)-1):
+        if lim_a[i + 1] - lim_a[i] == 1:
+            continue
+        else:
+            T.append(lim_a[i + 1] - lim_a[i])
+    return T
+
+# @jit(nopython=True)
+# @njit
+def energia_picos(lim_a, e_soc):
+    E = []
+    P = []
+    tes = []
+    t_ac = []
+    E_ac = []
+    t_rel = []
+    E_rel = []
+    t_ac_pesado = []
+    t_rel_pesado = []
+    i = 0
+    while i < len(lim_a)-1:
+        if lim_a[i + 1] - lim_a[i] == 1:
+            i = i + 1
+            continue
+        else:
+            m = e_soc[lim_a[i]+1:lim_a[i+1]]
+            E.append(np.sum(m))
+            P.append(np.max(m))
+            for j in range(0, len(m)):
+                if m[j-1] == np.max(m):
+                    t_ac.append(j)
+                    t_ac_pesado.append(j/float(len(m)))
+                    t_rel.append(len(m)-j)
+                    t_rel_pesado.append((len(m)-j)/float(len(m)))
+                    E_ac.append(np.sum(m[0:j]))
+                    E_rel.append(np.sum(m[j:-1]))
+                    aux = j + lim_a[i] + 1
+                    break
+            tes.append(aux)
+            i = i + 1
+            if i % 50000 == 0:
+                print(i)
+    return E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado
