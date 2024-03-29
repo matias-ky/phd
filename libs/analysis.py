@@ -4,6 +4,7 @@
 
 import numpy as np
 from numba import jit, njit
+from time import time
 
 
 def distribution_to_plot(E, normal=False):
@@ -126,3 +127,93 @@ def energia_picos(lim_a, e_soc):
             if i % 50000 == 0:
                 print(i)
     return E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado
+
+# Tiempo entre picos de las avalanchas
+def tiempo_entre_picos(tes):
+    return [tes[i + 1] - tes[i] for i in range(len(tes)-1)]
+
+# Tiempo entre fin de una avalancha e inicio de la otra
+def tiempo_fin_inicio(lim_a):
+    t_fi = []
+    contador = 1
+    for i in range(len(lim_a)-1):
+        if lim_a[i + 1] - lim_a[i] == 1:
+            contador = contador + 1
+            continue
+        if lim_a[i + 1] - lim_a[i] == 2:
+            t_fi.append(1)
+        else:
+            t_fi.append(contador)
+            contador = 1
+    return t_fi
+
+
+# Tiempo entre inicio de una avalancha e inicio de la otra
+def tiempo_inicio_inicio(lim_a):
+    t_ii = []
+    contador = 1
+    for i in range(len(lim_a)-1):
+        if lim_a[i + 1] - lim_a[i] == 1:
+            contador = contador + 1
+            continue
+        else:
+            t_ii.append(lim_a[i + 1] - lim_a[i] + contador)
+            contador = 1
+    return t_ii
+
+def eventos_extremos(e_soc, extremo):
+    e_max = max(e_soc)
+    umbral = e_max / extremo
+
+    # Lista con índices donde estan los 0 de e_soc. Me dice dónde están las avalanchas.
+    lim_a = np.where(np.array(e_soc) == 0)[0]
+
+    # start_time = time()
+    # T = duraciones(lim_a)
+    # print("T extreme --- %s seconds ---" % (time() - start_time))
+
+    # A las avalanchas de e_soc, las que superan el "umbral" sobreviven y las que no las plancho a 0.
+    e_soc_copy = np.array(e_soc.copy())
+    # tes = []
+    i = 0
+    while i < len(lim_a)-1:
+        if lim_a[i + 1] - lim_a[i] == 1:
+            i = i + 1
+            continue
+        else:
+            m = e_soc_copy[lim_a[i]+1:lim_a[i+1]]
+            if max(m) < umbral:
+                e_soc_copy[lim_a[i]+1:lim_a[i+1]] = 0
+                i = i + 1
+            else:
+            #     aux = np.where(np.array(m) == max(m))[0]+lim_a[i]+1
+            #     tes = np.append(tes, aux)
+                i = i + 1
+
+    # Lista con índices donde estan los 0 de e_soc_copy. Me dice dónde están las avalanchas con extremos.
+    lim_a = np.where(np.array(e_soc_copy) == 0)[0]
+
+    start_time = time()
+    T = duraciones(lim_a)
+    print("T extreme --- %s seconds ---" % (time() - start_time))
+
+    start_time = time()
+    E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado = energia_picos(lim_a, e_soc)
+    print("E, P, tes extreme --- %s seconds ---" % (time() - start_time))
+
+    # Tiempo entre picos de las avalanchas
+    start_time = time()
+    t_P = tiempo_entre_picos(tes)
+    print("t_P extreme --- %s seconds ---" % (time() - start_time))
+
+    # Tiempo entre fin de una avalancha e inicio de la otra
+    start_time = time()
+    t_fi = tiempo_fin_inicio(lim_a)
+    print("t_fi extreme --- %s seconds ---" % (time() - start_time))
+
+    # Tiempo entre inicio de una avalancha e inicio de la otra
+    start_time = time()
+    t_ii = tiempo_inicio_inicio(lim_a)
+    print("t_ii extreme --- %s seconds ---" % (time() - start_time))
+
+    return T, E, P, t_P, t_fi, t_ii, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado

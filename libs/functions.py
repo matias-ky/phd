@@ -3,6 +3,8 @@
 import numpy as np
 import random
 from numba import jit
+from time import time
+from libs.areas import *
 
 
 @jit(nopython=True)
@@ -245,3 +247,102 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
     del area_states[0]
     # Return the lists and final grid
     return e_lib, e_tot, B, grid_states, area_states
+
+def simulacion_completa(B, N, Zc, iterations):
+    retry = 10
+
+    for _ in range(retry):
+
+        try:
+            start_time_tot = time()
+
+            e_lib_tot = []
+            e_tot_tot = []
+            B_tot = []
+            areas_cubiertas_tot = []
+            cantidad_de_nodos_en_avalanchas_tot = []
+            lista_de_clusters_tot = []
+
+            for iter_tot in range(20):
+                start_time_iter = time()
+                print("Arranca iteracion " + str(iter_tot))
+
+                # # DETERMINISTA
+                # start_time = time()
+                # e_lib, e_tot, B, lista_de_grillas, lista_de_areas = auto_cel_D(
+                #     B, Z_c=1, N_i=10000, eps=0.001, D_nc=0.1)
+                # print("--- %s seconds --- e_lib" % (time() - start_time))
+
+                # CLÁSICO
+                start_time = time()
+                e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_standard(B, N, Zc, iterations)
+                print("--- %s seconds --- e_lib" % (time() - start_time))
+
+                # # start_time = time()
+                # # grillas_con_nodos_inestables = nodos_inestables(np.array(lista_de_grillas), Zc,
+                # #                                                 Zc_porcentaje=0.8)
+                # # print("--- %s seconds --- grillas" % (time() - start_time))
+
+                start_time = time()
+                areas_de_avalanchas, areas_de_avalanchas_por_avalancha = avalanche_areas_func(
+                    lista_de_areas)
+                print("--- %s seconds --- areas de avalanchas" %
+                    (time() - start_time))
+
+                start_time = time()
+                areas_cubiertas = calculate_covered_areas(
+                    List(areas_de_avalanchas))
+                print("--- %s seconds --- areas cubiertas" %
+                    (time() - start_time))
+
+                # # Create a typed list from areas_de_avalanchas
+                # typed_areas_de_avalanchas = List()
+                # for area_de_avalancha in areas_de_avalanchas:
+                #     typed_areas_de_avalanchas.append(area_de_avalancha)
+
+                # # Call the function with the typed list
+                # areas_cubiertas = calcular_areas_cubiertas(
+                #     typed_areas_de_avalanchas)
+
+                start_time = time()
+                cantidad_de_nodos_en_avalanchas = node_count_in_avalanche(
+                    areas_de_avalanchas_por_avalancha)
+                print("--- %s seconds --- nodos en avalanchas" %
+                    (time() - start_time))
+
+                # # start_time = time()
+                # # nodos_inestasbles_antes = nodos_inest_antes_de_avalanchar(
+                # #     grillas_con_nodos_inestables)
+                # # print("--- %s seconds --- nodos inest antes" % (time() - start_time))
+
+                # start_time = time()
+                # lista_de_clusters = [csr_matrix(find_clusters(
+                #     area_de_avalancha)) for area_de_avalancha in areas_de_avalanchas]
+                # print("--- %s seconds --- hoshen kopelman" %
+                #       (time() - start_time))
+
+                start_time = time()
+                lista_de_clusters = [csr_matrix(measure.label(
+                    area_de_avalancha > 0)) for area_de_avalancha in areas_de_avalanchas]
+                print("--- %s seconds --- hoshen kopelman" %
+                    (time() - start_time))
+
+                e_lib_tot = e_lib_tot + e_lib
+                e_tot_tot = e_tot_tot + e_tot
+                B_tot.extend(B)
+                areas_cubiertas_tot = areas_cubiertas_tot + areas_cubiertas
+                cantidad_de_nodos_en_avalanchas_tot = cantidad_de_nodos_en_avalanchas_tot + \
+                    cantidad_de_nodos_en_avalanchas
+                lista_de_clusters_tot += lista_de_clusters
+                del lista_de_grillas
+                del lista_de_areas
+
+                print("--- %s seconds --- iter" % (time() - start_time_iter))
+
+            print("--- %s seconds ---" % (time() - start_time_tot))
+            break
+
+        except:
+            pass
+
+    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, cantidad_de_nodos_en_avalanchas_tot, lista_de_clusters_tot
