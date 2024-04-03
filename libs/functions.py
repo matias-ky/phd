@@ -91,7 +91,11 @@ def lu_ham_standard(B, N, Zc, iterations):
     zc_s_over_s = Zc / s  # Calculate zc_s_over_s
     two_d_s_over_s_zc = ((2*D) / s) * Zc  # Calculate two_d_s_over_s_zc
 
-    for i in range(iterations):
+    keep_going = True
+    i = 0
+
+    while keep_going:
+        i += 1
         e = 0  # Initialize energy variable
 
         # Iterate through the grid
@@ -122,6 +126,8 @@ def lu_ham_standard(B, N, Zc, iterations):
             B += C
             C = np.zeros((N+2, N+2), dtype=np.float32)
         else:  # Randomly update a cell if energy is non-positive
+            if i > iterations: # This guarantees that it ends after 0 energy release
+                keep_going = False
             k_prime = [random.randint(1, N+1), random.randint(1, N+1)]
             delta_B = random.random() - 0.2
             B[k_prime[0], k_prime[1]] = B[k_prime[0], k_prime[1]] + delta_B
@@ -199,7 +205,11 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
     grid_states = [B]  # List to store grid states
     area_states = [B]  # List to store area states
 
-    for k in range(N_i):
+    keep_going = True
+    k = 0
+
+    while keep_going:
+        k += 1
         e = 0
         # Z = np.empty((N, N))
         r_0 = random.uniform(D_nc, 1)
@@ -233,6 +243,8 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
                     B[i, j] = B[i, j]+C[i, j]  # Update the field
                     C[i, j] = 0
         else:  # Global Driving
+            if k > N_i: # This guarantees that it ends after 0 energy release
+                keep_going = False
             for i in range(1, N-1):  # Redistribution
                 for j in range(1, N-1):
                     B[i, j] = B[i, j]*(1+eps)
@@ -249,7 +261,7 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
     return e_lib, e_tot, B, grid_states, area_states
 
 def simulacion_completa(B, N, Zc, iterations):
-    retry = 10
+    retry = 1
 
     for _ in range(retry):
 
@@ -263,9 +275,11 @@ def simulacion_completa(B, N, Zc, iterations):
             cantidad_de_nodos_en_avalanchas_tot = []
             lista_de_clusters_tot = []
 
-            for iter_tot in range(20):
-                start_time_iter = time()
-                print("Arranca iteracion " + str(iter_tot))
+            chunks_range = 2000
+
+            for iter_tot in range(chunks_range):
+                # start_time_iter = time()
+                # print("Arranca iteracion " + str(iter_tot))
 
                 # # DETERMINISTA
                 # start_time = time()
@@ -274,26 +288,26 @@ def simulacion_completa(B, N, Zc, iterations):
                 # print("--- %s seconds --- e_lib" % (time() - start_time))
 
                 # CLÁSICO
-                start_time = time()
+                # start_time = time()
                 e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_standard(B, N, Zc, iterations)
-                print("--- %s seconds --- e_lib" % (time() - start_time))
+                # print("--- %s seconds --- e_lib" % (time() - start_time))
 
                 # # start_time = time()
                 # # grillas_con_nodos_inestables = nodos_inestables(np.array(lista_de_grillas), Zc,
                 # #                                                 Zc_porcentaje=0.8)
                 # # print("--- %s seconds --- grillas" % (time() - start_time))
 
-                start_time = time()
+                # start_time = time()
                 areas_de_avalanchas, areas_de_avalanchas_por_avalancha = avalanche_areas_func(
                     lista_de_areas)
-                print("--- %s seconds --- areas de avalanchas" %
-                    (time() - start_time))
+                # print("--- %s seconds --- areas de avalanchas" %
+                #     (time() - start_time))
 
-                start_time = time()
+                # start_time = time()
                 areas_cubiertas = calculate_covered_areas(
                     List(areas_de_avalanchas))
-                print("--- %s seconds --- areas cubiertas" %
-                    (time() - start_time))
+                # print("--- %s seconds --- areas cubiertas" %
+                #     (time() - start_time))
 
                 # # Create a typed list from areas_de_avalanchas
                 # typed_areas_de_avalanchas = List()
@@ -304,11 +318,11 @@ def simulacion_completa(B, N, Zc, iterations):
                 # areas_cubiertas = calcular_areas_cubiertas(
                 #     typed_areas_de_avalanchas)
 
-                start_time = time()
+                # start_time = time()
                 cantidad_de_nodos_en_avalanchas = node_count_in_avalanche(
                     areas_de_avalanchas_por_avalancha)
-                print("--- %s seconds --- nodos en avalanchas" %
-                    (time() - start_time))
+                # print("--- %s seconds --- nodos en avalanchas" %
+                #     (time() - start_time))
 
                 # # start_time = time()
                 # # nodos_inestasbles_antes = nodos_inest_antes_de_avalanchar(
@@ -321,11 +335,11 @@ def simulacion_completa(B, N, Zc, iterations):
                 # print("--- %s seconds --- hoshen kopelman" %
                 #       (time() - start_time))
 
-                start_time = time()
+                # start_time = time()
                 lista_de_clusters = [csr_matrix(measure.label(
                     area_de_avalancha > 0)) for area_de_avalancha in areas_de_avalanchas]
-                print("--- %s seconds --- hoshen kopelman" %
-                    (time() - start_time))
+                # print("--- %s seconds --- hoshen kopelman" %
+                #     (time() - start_time))
 
                 e_lib_tot = e_lib_tot + e_lib
                 e_tot_tot = e_tot_tot + e_tot
@@ -337,7 +351,9 @@ def simulacion_completa(B, N, Zc, iterations):
                 del lista_de_grillas
                 del lista_de_areas
 
-                print("--- %s seconds --- iter" % (time() - start_time_iter))
+                # print("--- %s seconds --- iter" % (time() - start_time_iter))
+                if iter_tot%(chunks_range/10) == 0:
+                    print("Iteracion " + str(iter_tot) + " de " + str(chunks_range) + " --- %s seconds ---" % (time() - start_time_tot))
 
             print("--- %s seconds ---" % (time() - start_time_tot))
             break

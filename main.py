@@ -18,7 +18,7 @@ set_seed(7)
 
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/phd/B_final_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/B_N62_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
@@ -38,7 +38,7 @@ _, _, _, _, _ = lu_ham_deterministic(
 # %%
 
 # Run simulation with increased iterations
-iterations = 200000
+iterations = 20000
 
 # Standard
 start_time = time()
