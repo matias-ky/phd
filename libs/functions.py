@@ -285,28 +285,28 @@ def simulacion_completa(B, N, Zc, iterations):
                 # start_time = time()
                 # e_lib, e_tot, B, lista_de_grillas, lista_de_areas = auto_cel_D(
                 #     B, Z_c=1, N_i=10000, eps=0.001, D_nc=0.1)
-                # print("--- %s seconds --- e_lib" % (time() - start_time))
+                # print("--- %.4f seconds --- e_lib" % (time() - start_time))
 
                 # CLÁSICO
                 # start_time = time()
                 e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_standard(B, N, Zc, iterations)
-                # print("--- %s seconds --- e_lib" % (time() - start_time))
+                # print("--- %.4f seconds --- e_lib" % (time() - start_time))
 
                 # # start_time = time()
                 # # grillas_con_nodos_inestables = nodos_inestables(np.array(lista_de_grillas), Zc,
                 # #                                                 Zc_porcentaje=0.8)
-                # # print("--- %s seconds --- grillas" % (time() - start_time))
+                # # print("--- %.4f seconds --- grillas" % (time() - start_time))
 
                 # start_time = time()
                 areas_de_avalanchas, areas_de_avalanchas_por_avalancha = avalanche_areas_func(
                     lista_de_areas)
-                # print("--- %s seconds --- areas de avalanchas" %
+                # print("--- %.4f seconds --- areas de avalanchas" %
                 #     (time() - start_time))
 
                 # start_time = time()
                 areas_cubiertas = calculate_covered_areas(
                     List(areas_de_avalanchas))
-                # print("--- %s seconds --- areas cubiertas" %
+                # print("--- %.4f seconds --- areas cubiertas" %
                 #     (time() - start_time))
 
                 # # Create a typed list from areas_de_avalanchas
@@ -321,24 +321,24 @@ def simulacion_completa(B, N, Zc, iterations):
                 # start_time = time()
                 cantidad_de_nodos_en_avalanchas = node_count_in_avalanche(
                     areas_de_avalanchas_por_avalancha)
-                # print("--- %s seconds --- nodos en avalanchas" %
+                # print("--- %.4f seconds --- nodos en avalanchas" %
                 #     (time() - start_time))
 
                 # # start_time = time()
                 # # nodos_inestasbles_antes = nodos_inest_antes_de_avalanchar(
                 # #     grillas_con_nodos_inestables)
-                # # print("--- %s seconds --- nodos inest antes" % (time() - start_time))
+                # # print("--- %.4f seconds --- nodos inest antes" % (time() - start_time))
 
                 # start_time = time()
                 # lista_de_clusters = [csr_matrix(find_clusters(
                 #     area_de_avalancha)) for area_de_avalancha in areas_de_avalanchas]
-                # print("--- %s seconds --- hoshen kopelman" %
+                # print("--- %.4f seconds --- hoshen kopelman" %
                 #       (time() - start_time))
 
                 # start_time = time()
                 lista_de_clusters = [csr_matrix(measure.label(
                     area_de_avalancha > 0)) for area_de_avalancha in areas_de_avalanchas]
-                # print("--- %s seconds --- hoshen kopelman" %
+                # print("--- %.4f seconds --- hoshen kopelman" %
                 #     (time() - start_time))
 
                 e_lib_tot = e_lib_tot + e_lib
@@ -351,11 +351,11 @@ def simulacion_completa(B, N, Zc, iterations):
                 del lista_de_grillas
                 del lista_de_areas
 
-                # print("--- %s seconds --- iter" % (time() - start_time_iter))
+                # print("--- %.4f seconds --- iter" % (time() - start_time_iter))
                 if iter_tot%(chunks_range/10) == 0:
-                    print("Iteracion " + str(iter_tot) + " de " + str(chunks_range) + " --- %s seconds ---" % (time() - start_time_tot))
+                    print("Complete " + str(100*iter_tot/chunks_range) + "%" + " --- %.4f seconds ---" % (time() - start_time_tot))
 
-            print("--- %s seconds ---" % (time() - start_time_tot))
+            # print("--- %.4f seconds ---" % (time() - start_time_tot))
             break
 
         except:

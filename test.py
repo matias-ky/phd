@@ -16,7 +16,7 @@ set_seed(7)
 
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/B_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/initial_grids/B_N62_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
@@ -44,5 +44,5 @@ iterations = 10
 # Standard
 start_time = time()
 e_lib_st, e_tot_st, B_st, areas_cubiertas_st, cantidad_de_nodos_en_avalanchas_st, lista_de_clusters_st = simulacion_completa(B_N62, N, Zc, iterations)
-print("LU&H Standard: --- %s seconds ---" % (time() - start_time))
+print("LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
 print(len(e_lib_st))
