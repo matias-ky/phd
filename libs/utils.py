@@ -4,6 +4,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import logging
 
 # TODO: Fix for semilog fit plot
 def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, fit=True, save=False):
@@ -90,3 +91,17 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
 
     # plt.show()
     plt.close()
+
+# Define a custom logging level
+TIME_EXECUTION = 15  # You can choose any value between logging.DEBUG (10) and logging.INFO (20)
+
+# Add the custom logging level to the logging module
+logging.addLevelName(TIME_EXECUTION, "TIME_EXECUTION")
+
+# Create a custom logger for time execution
+time_execution_logger = logging.getLogger("time_execution")
+# time_execution_logger.setLevel(TIME_EXECUTION)
+time_execution_handler = logging.StreamHandler()
+time_execution_formatter = logging.Formatter("%(message)s")
+time_execution_handler.setFormatter(time_execution_formatter)
+time_execution_logger.addHandler(time_execution_handler)

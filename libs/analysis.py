@@ -5,6 +5,8 @@
 import numpy as np
 from numba import jit, njit
 from time import time
+import logging
+from libs.utils import *
 
 
 def distribution_to_plot(E, normal=False):
@@ -68,11 +70,11 @@ def distribution_to_plot(E, normal=False):
                 xe_log.append(np.log(xe[i]))
                 ye_log.append(np.log(ye[i]))
 
-        me, be = np.polyfit(xe_log[2:20], ye_log[2:20], 1, cov=True)[0]
-        _, cov = np.polyfit(xe_log[2:20], ye_log[2:20], 1, cov=True)
+        me, be = np.polyfit(xe_log[-30:], ye_log[-30:], 1, cov=True)[0]
+        _, cov = np.polyfit(xe_log[-30:], ye_log[-30:], 1, cov=True)
         me_error, be_error = np.sqrt(np.diag(cov))
-        fit = np.poly1d([me, be])
-        print(f"The power-law exponent is {me} and error is {me_error}")
+        # fit = np.poly1d([me, be])
+        logging.info(f"The power-law exponent is {me:.4f} and error is {me_error:.4f}")
 
     fit_ye = []
     if not normal:
@@ -124,8 +126,8 @@ def energia_picos(lim_a, e_soc):
                     break
             tes.append(aux)
             i = i + 1
-            if i % 50000 == 0:
-                print(i)
+            # if i % 50000 == 0:
+            #     print(i)
     return E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado
 
 # Tiempo entre picos de las avalanchas
@@ -170,7 +172,7 @@ def eventos_extremos(e_soc, extremo):
 
     # start_time = time()
     # T = duraciones(lim_a)
-    # print("T extreme --- %s seconds ---" % (time() - start_time))
+    # time_execution_logger.log(TIME_EXECUTION, "T extreme --- %s seconds ---" % (time() - start_time))
 
     # A las avalanchas de e_soc, las que superan el "umbral" sobreviven y las que no las plancho a 0.
     e_soc_copy = np.array(e_soc.copy())
@@ -195,25 +197,25 @@ def eventos_extremos(e_soc, extremo):
 
     start_time = time()
     T = duraciones(lim_a)
-    print("T extreme --- %s seconds ---" % (time() - start_time))
+    time_execution_logger.log(TIME_EXECUTION, "T extreme --- %s seconds ---" % (time() - start_time))
 
     start_time = time()
     E, P, tes, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado = energia_picos(lim_a, e_soc)
-    print("E, P, tes extreme --- %s seconds ---" % (time() - start_time))
+    time_execution_logger.log(TIME_EXECUTION, "E, P, tes extreme --- %s seconds ---" % (time() - start_time))
 
     # Tiempo entre picos de las avalanchas
     start_time = time()
     t_P = tiempo_entre_picos(tes)
-    print("t_P extreme --- %s seconds ---" % (time() - start_time))
+    time_execution_logger.log(TIME_EXECUTION, "t_P extreme --- %s seconds ---" % (time() - start_time))
 
     # Tiempo entre fin de una avalancha e inicio de la otra
     start_time = time()
     t_fi = tiempo_fin_inicio(lim_a)
-    print("t_fi extreme --- %s seconds ---" % (time() - start_time))
+    time_execution_logger.log(TIME_EXECUTION, "t_fi extreme --- %s seconds ---" % (time() - start_time))
 
     # Tiempo entre inicio de una avalancha e inicio de la otra
     start_time = time()
     t_ii = tiempo_inicio_inicio(lim_a)
-    print("t_ii extreme --- %s seconds ---" % (time() - start_time))
+    time_execution_logger.log(TIME_EXECUTION, "t_ii extreme --- %s seconds ---" % (time() - start_time))
 
     return T, E, P, t_P, t_fi, t_ii, t_ac, E_ac, t_rel, E_rel, t_ac_pesado, t_rel_pesado
