@@ -132,13 +132,13 @@ fit=True
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_st)
 distribution_plot(xe, ye, fit_ye, "A",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_det)
 distribution_plot(xe, ye, fit_ye, "A",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 # %%
 
@@ -156,13 +156,13 @@ print("node_count_in_avalanches_peak Deterministic --- %.4f seconds ---" % (time
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_st)
 distribution_plot(xe, ye, fit_ye, "A^{*}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_det)
 distribution_plot(xe, ye, fit_ye, "A^{*}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 # %%
 
@@ -179,7 +179,7 @@ plt.ylabel(r"PDF($"+"D_{st}"+"$)", size=20)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.grid(c='black', alpha=0.3)
-plt.tight_layout()
+# plt.tight_layout()
 plt.show()
 
 print("Mean Fractal Index St: " + str(np.mean(fractal_index_st)))
@@ -196,7 +196,7 @@ plt.ylabel(r"PDF($"+"D_{det}"+"$)", size=20)
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.grid(c='black', alpha=0.3)
-plt.tight_layout()
+# plt.tight_layout()
 plt.show()
 
 print("Mean Fractal Index det: " + str(np.mean(fractal_index_det)))
@@ -260,130 +260,130 @@ print("t_ii tiempo_inicio_inicio Deterministic --- %.4f seconds ---" % (time() -
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_st)
 distribution_plot(xe, ye, fit_ye, "E_{st}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("E distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_det)
 distribution_plot(xe, ye, fit_ye, "E_{det}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("E distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # P
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(P_st)
 distribution_plot(xe, ye, fit_ye, "P_{st}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("P distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(P_det)
 distribution_plot(xe, ye, fit_ye, "P_{det}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("P distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # T
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(T_st)
 distribution_plot(xe, ye, fit_ye, "T_{st}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("T distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(T_det)
 distribution_plot(xe, ye, fit_ye, "T_{det}",
-                  scale="log", fit=fit, save=False)
+                  scale="log", fit=fit, save=True)
 print("T distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_P
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_P_st)
-distribution_plot(xe, ye, fit_ye, "t_{P_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{P_{st}}",
+                  scale="log", fit=fit, save=True)
 print("t_P distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_P_det)
-distribution_plot(xe, ye, fit_ye, "t_{P_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{P_{det}}",
+                  scale="log", fit=fit, save=True)
 print("t_P distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_fi
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_fi_st)
-distribution_plot(xe, ye, fit_ye, "t_{fi_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{fi}_{st}}",
+                  scale="semilog", fit=fit, save=True)
 print("t_fi distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_fi_det)
-distribution_plot(xe, ye, fit_ye, "t_{fi_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{fi}_{det}}",
+                  scale="semilog", fit=fit, save=True)
 print("t_fi distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_ii
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ii_st)
-distribution_plot(xe, ye, fit_ye, "t_{ii_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{ii}_{st}}",
+                  scale="log", fit=fit, save=True)
 print("t_ii distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ii_det)
-distribution_plot(xe, ye, fit_ye, "t_{ii_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{ii}_{det}}",
+                  scale="log", fit=fit, save=True)
 print("t_ii distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_ac
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_st)
-distribution_plot(xe, ye, fit_ye, "t_{ac_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{ac}_{st}}",
+                  scale="log", fit=fit, save=True)
 print("t_ac distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_det)
-distribution_plot(xe, ye, fit_ye, "t_{ac_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{ac}_{det}}",
+                  scale="log", fit=fit, save=True)
 print("t_ac distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_rel
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_st)
-distribution_plot(xe, ye, fit_ye, "t_{rel_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{rel}_{st}}",
+                  scale="log", fit=fit, save=True)
 print("t_rel distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_det)
-distribution_plot(xe, ye, fit_ye, "t_{rel_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "t_{{rel}_{det}}",
+                  scale="log", fit=fit, save=True)
 print("t_rel distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # E_ac
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_ac_st)
-distribution_plot(xe, ye, fit_ye, "E_{ac_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "E_{{ac}_{st}}",
+                  scale="log", fit=fit, save=True)
 print("E_ac distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_ac_det)
-distribution_plot(xe, ye, fit_ye, "E_{ac_det}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "E_{{ac}_{det}}",
+                  scale="log", fit=fit, save=True)
 print("E_ac distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # E_rel
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_rel_st)
-distribution_plot(xe, ye, fit_ye, "E_{rel_st}",
-                  scale="log", fit=fit, save=False)
+distribution_plot(xe, ye, fit_ye, "E_{{rel}_{st}}",
+                  scale="log", fit=fit, save=True)
 print("E_rel distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(E_rel_det, normal=True)
 # distribution_plot(xe, ye, fit_ye, "E_{rel_det}",
-#                   scale="log", fit=fit, save=False)
+#                   scale="log", fit=fit, save=True)
 plt.plot(xe, ye, "o", mfc="none", label="E_rel_det", markersize=9)
 plt.show()
 print("E_rel distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
@@ -392,7 +392,7 @@ print("E_rel distribution_to_plot Deterministic --- %.4f seconds ---" % (time() 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_st, normal=True)
 # distribution_plot(xe, ye, fit_ye, "t_{ac_pesado_st}",
-#                   scale="log", fit=fit, save=False)
+#                   scale="log", fit=fit, save=True)
 plt.plot(xe, ye, "o", mfc="none", label="t_ac_pesado_st", markersize=9)
 plt.show()
 print("t_ac_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
@@ -400,7 +400,7 @@ print("t_ac_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time(
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_det, normal=True)
 # distribution_plot(xe, ye, fit_ye, "t_{ac_pesado_det}",
-#                   scale="log", fit=fit, save=False)
+#                   scale="log", fit=fit, save=True)
 plt.plot(xe, ye, "o", mfc="none", label="t_ac_pesado_det", markersize=9)
 plt.show()
 print("t_ac_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
@@ -409,7 +409,7 @@ print("t_ac_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (t
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_pesado_st, normal=True)
 # distribution_plot(xe, ye, fit_ye, "t_{rel_pesado_st}",
-#                   scale="log", fit=fit, save=False)
+#                   scale="log", fit=fit, save=True)
 plt.plot(xe, ye, "o", mfc="none", label="t_rel_pesado_st", markersize=9)
 plt.show()
 print("t_rel_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
@@ -417,7 +417,7 @@ print("t_rel_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_pesado_det, normal=True)
 # distribution_plot(xe, ye, fit_ye, "t_{rel_pesado_det}",
-#                   scale="log", fit=fit, save=False)
+#                   scale="log", fit=fit, save=True)
 plt.plot(xe, ye, "o", mfc="none", label="t_rel_pesado_det", markersize=9)
 plt.show()
 print("t_rel_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))

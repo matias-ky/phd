@@ -5,7 +5,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+# TODO: Fix for semilog fit plot
 def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, fit=True, save=False):
     """
     Generate a distribution plot.
@@ -42,6 +42,8 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     >>> fitted_data = np.cos(x_data)
     >>> distribution_plot(x_data, y_data, fitted_data, variable='x', scale='log', fit=True, save=False)
     """
+    # plt.figure(figsize=(8, 6))
+    plt.figure()
 
     plt.style.use("ggplot")  # Define the plot style
     plt.rcParams['axes.facecolor'] = 'w'
@@ -83,7 +85,8 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     plt.tight_layout()
 
     if save:
-        plt.savefig("plot_"+variable+"_fit.pdf")
-        plt.savefig("plot_"+variable+"_fit.png", dpi=300)
+        plt.savefig("plots/pdf/plot_"+variable+"_fit.pdf")
+        plt.savefig("plots/png/plot_"+variable+"_fit.png", dpi=300)
 
-    plt.show()
+    # plt.show()
+    plt.close()
