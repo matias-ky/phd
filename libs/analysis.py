@@ -7,9 +7,10 @@ from numba import jit, njit
 from time import time
 import logging
 from libs.utils import *
+from sklearn.metrics import r2_score
 
 
-def distribution_to_plot(E, normal=False):
+def distribution_to_plot(E, normal=False, semilog=False):
     """
     Generate distribution data for plotting.
 
@@ -67,19 +68,27 @@ def distribution_to_plot(E, normal=False):
             if ye[i] == 0:
                 continue
             else:
-                xe_log.append(np.log(xe[i]))
+                if not semilog:
+                    xe_log.append(np.log(xe[i]))
+                else:
+                    xe_log.append(xe[i])
                 ye_log.append(np.log(ye[i]))
 
         me, be = np.polyfit(xe_log[-30:], ye_log[-30:], 1, cov=True)[0]
         _, cov = np.polyfit(xe_log[-30:], ye_log[-30:], 1, cov=True)
         me_error, be_error = np.sqrt(np.diag(cov))
-        # fit = np.poly1d([me, be])
-        logging.info(f"The power-law exponent is {me:.4f} and error is {me_error:.4f}")
+        fit = np.poly1d([me, be])
+        r2e = r2_score(ye_log, fit(xe_log))
+        logging.info(f"The power-law exponent is {me:.4f}, error is {me_error:.4f} and r2 score is {r2e:.4f}")
 
     fit_ye = []
     if not normal:
-        for i in range(len(xe)):
-            fit_ye.append(np.exp(be)*(xe[i]**me))
+        if semilog:
+            for i in range(len(xe)):
+                fit_ye.append(np.exp(be)*(np.exp(xe[i]*me)))
+        else:
+            for i in range(len(xe)):
+                fit_ye.append(np.exp(be)*(xe[i]**me))
 
     return xe, ye, fit_ye
 

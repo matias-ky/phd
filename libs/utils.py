@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import logging
 
-# TODO: Fix for semilog fit plot
+
 def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, fit=True, save=False):
     """
     Generate a distribution plot.
@@ -88,6 +88,8 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     if save:
         plt.savefig("plots/pdf/plot_"+variable+"_fit.pdf")
         plt.savefig("plots/png/plot_"+variable+"_fit.png", dpi=300)
+    else:
+        plt.show()
 
     # plt.show()
     plt.close()

@@ -49,13 +49,17 @@ iterations = 20000
 start_time = time()
 e_lib_st, e_tot_st, B_st, grid_list_st, area_list_st = lu_ham_standard(
     B_N62, N, Zc, iterations)
-time_execution_logger.log(TIME_EXECUTION, "LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
+# time_execution_logger.log(TIME_EXECUTION, "LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
+logging.info("LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
+logging.info("LU&H Standard: --- %.0f iterations ---" % (len(e_lib_st)))
 
 # Deterministic
 start_time = time()
 e_lib_det, e_tot_det, B_det, grid_list_det, area_list_det = lu_ham_deterministic(
     B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
-time_execution_logger.log(TIME_EXECUTION, "LU&H Deterministic --- %.4f seconds ---" % (time() - start_time))
+# time_execution_logger.log(TIME_EXECUTION, "LU&H Deterministic --- %.4f seconds ---" % (time() - start_time))
+logging.info("LU&H Deterministic: --- %.4f seconds ---" % (time() - start_time))
+logging.info("LU&H Deterministic: --- %.0f iterations ---" % (len(e_lib_det)))
 
 # %%
 
@@ -313,13 +317,13 @@ time_execution_logger.log(TIME_EXECUTION, "t_P distribution_to_plot Deterministi
 # t_fi
 logging.info("t_fi")
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(t_fi_st)
+xe, ye, fit_ye = distribution_to_plot(t_fi_st, semilog=True)
 distribution_plot(xe, ye, fit_ye, "t_{{fi}_{st}}",
                   scale="semilog", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_fi distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(t_fi_det)
+xe, ye, fit_ye = distribution_to_plot(t_fi_det, semilog=True)
 distribution_plot(xe, ye, fit_ye, "t_{{fi}_{det}}",
                   scale="semilog", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_fi distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
@@ -388,50 +392,37 @@ distribution_plot(xe, ye, fit_ye, "E_{{rel}_{st}}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "E_rel distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
-# TODO: Fix the error in the dimentions of the arrays xe and ye for the commented plot
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(E_rel_det, normal=True)
-# distribution_plot(xe, ye, fit_ye, "E_{{rel}_{det}}",
-#                   scale="log", fit=fit, save=True)
-plt.plot(xe, ye, "o", mfc="none", label="E_rel_det", markersize=9)
-plt.show()
+xe, ye, fit_ye = distribution_to_plot(E_rel_det)
+distribution_plot(xe[1:], ye[1:], fit_ye[1:], "E_{{rel}_{det}}", 
+                  scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "E_rel distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_ac_pesado
 logging.info("t_ac_pesado")
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_st, normal=True)
-# distribution_plot(xe, ye, fit_ye, "t_{ac_pesado_st}",
-#                   scale="log", fit=fit, save=True)
-plt.plot(xe, ye, "o", mfc="none", label="t_ac_pesado_st", markersize=9)
-plt.show()
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{pesado}_{st}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_ac_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_det, normal=True)
-# distribution_plot(xe, ye, fit_ye, "t_{ac_pesado_det}",
-#                   scale="log", fit=fit, save=True)
-plt.plot(xe, ye, "o", mfc="none", label="t_ac_pesado_det", markersize=9)
-plt.show()
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{pesado}_{det}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_ac_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_rel_pesado
 logging.info("t_rel_pesado")
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(t_rel_pesado_st, normal=True)
-# distribution_plot(xe, ye, fit_ye, "t_{rel_pesado_st}",
-#                   scale="log", fit=fit, save=True)
-plt.plot(xe, ye, "o", mfc="none", label="t_rel_pesado_st", markersize=9)
-plt.show()
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{rel}_{{pesado}_{st}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_rel_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_pesado_det, normal=True)
-# distribution_plot(xe, ye, fit_ye, "t_{rel_pesado_det}",
-#                   scale="log", fit=fit, save=True)
-plt.plot(xe, ye, "o", mfc="none", label="t_rel_pesado_det", markersize=9)
-plt.show()
+distribution_plot(xe[:-1], ye[:-1], fit_ye, "t_{{{rel}_{{pesado}_{det}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_rel_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
+
+logging.info("Number of avalanches analyzed Standard: " + str(len(T_st)))
+logging.info("Number of avalanches analyzed Deterministic: " + str(len(T_det)))
 # %%
 
 # Eventos Extremos
