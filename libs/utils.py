@@ -46,7 +46,7 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     # plt.figure(figsize=(8, 6))
     plt.figure()
 
-    plt.style.use("ggplot")  # Define the plot style
+    # plt.style.use("ggplot")  # Define the plot style
     plt.rcParams['axes.facecolor'] = 'w'
 
     plt.plot(x_values, y_values, "o", mfc="none",
@@ -63,19 +63,11 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     if scale == "semilog":
         plt.yscale("log")
 
-    if scale == "log":
-        plt.xlim(
-            (np.min(x_values)/1.5, x_values[np.max(np.nonzero(y_values))]*10))
-        plt.ylim(
-            (y_values[np.max(np.nonzero(y_values))]/5, np.max(y_values)*10))
-
-        # Add manual borders
-        plt.axvline(np.min(x_values)/1.45, color="black")  # Left
-        plt.axvline(x_values[np.max(np.nonzero(y_values))]
-                    * 9.7, color="black")  # Right
-        plt.axhline(y_values[np.max(np.nonzero(y_values))] /
-                    4.9, color="black")  # Bottom
-        plt.axhline(np.max(y_values)*8.8, color="black")  # Top
+    # if scale == "log":
+    #     plt.xlim(
+    #         (np.min(x_values)/1.5, x_values[np.max(np.nonzero(y_values))]*10))
+    #     plt.ylim(
+    #         (y_values[np.max(np.nonzero(y_values))]/5, np.max(y_values)*10))
 
     plt.xlabel(r"$"+variable+"$", size=20)
     plt.ylabel(r"PDF($"+variable+"$)", size=20)
@@ -91,7 +83,6 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     else:
         plt.show()
 
-    # plt.show()
     plt.close()
 
 # Define a custom logging level

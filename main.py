@@ -402,23 +402,23 @@ time_execution_logger.log(TIME_EXECUTION, "E_rel distribution_to_plot Determinis
 logging.info("t_ac_pesado")
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_st, normal=True)
-distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{pesado}_{st}}}}", fit=False, save=True)
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{w}_{st}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_ac_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ac_pesado_det, normal=True)
-distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{pesado}_{det}}}}", fit=False, save=True)
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{ac}_{{w}_{det}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_ac_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 # t_rel_pesado
 logging.info("t_rel_pesado")
 start_time = time()
-distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{rel}_{{pesado}_{st}}}}", fit=False, save=True)
+distribution_plot(xe[1:], ye[1:], fit_ye, "t_{{{rel}_{{w}_{st}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_rel_pesado distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_rel_pesado_det, normal=True)
-distribution_plot(xe[:-1], ye[:-1], fit_ye, "t_{{{rel}_{{pesado}_{det}}}}", fit=False, save=True)
+distribution_plot(xe[:-1], ye[:-1], fit_ye, "t_{{{rel}_{{w}_{det}}}}", fit=False, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_rel_pesado distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 logging.info("Number of avalanches analyzed Standard: " + str(len(T_st)))
