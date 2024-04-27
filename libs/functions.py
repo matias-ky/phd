@@ -260,6 +260,92 @@ def lu_ham_deterministic(B, Z_c, N_i, eps, D_nc):
     # Return the lists and final grid
     return e_lib, e_tot, B, grid_states, area_states
 
+@jit(nopython=True)
+def dgd_random_redistribution(B, N, Zc, iterations, eps=0.001):
+    """
+    Deterministic Global Driving with Random Redistribution.
+    """
+
+    C = np.zeros((N+2, N+2), dtype=np.float32)  # Initialize C matrix
+    M = np.zeros((N+2, N+2), dtype=np.float32)  # Initialize M matrix
+    D = 2  # Dimension
+    s = 2*D+1  # 5 for 2D lattice
+    grid_list = [B]  # Initialize list to store grids
+    area_list = [B]  # Initialize list to store areas
+    e_lib = []  # Initialize list to store e values
+    e_tot = []  # Initialize list to store total energy values
+    zc_s_over_s = Zc / s  # Zc/5 for 2D lattice
+    two_d_s_over_s_zc = ((2*D) / s) * Zc  # 4/5 for 2D lattice
+
+    r1 = random.uniform(0, 1)
+    r2 = random.uniform(r1, 1)
+    r3 = random.uniform(r2, 1)
+    r4 = 1 - r1 - r2 - r3
+
+    keep_going = True
+    i = 0
+
+    while keep_going:
+        i += 1
+        e = 0  # Initialize energy variable
+
+        # Iterate through the grid
+        for j in range(1, N+1):
+            for k in range(1, N+1):
+                Z = B[j, k] - (1/(2*D)) * (B[j+1, k] +
+                                           B[j-1, k] + B[j, k+1] + B[j, k-1])
+                abs_z = abs(Z)
+
+                # Check if condition is met for energy update
+                if abs_z > Zc:
+                    C[j, k] = C[j, k] - two_d_s_over_s_zc
+                    C[j+1, k] = C[j+1, k] + (4/5) * r1 * zc_s_over_s
+                    C[j-1, k] = C[j-1, k] + (4/5) * r2 * zc_s_over_s
+                    C[j, k+1] = C[j, k+1] + (4/5) * r3 * zc_s_over_s
+                    C[j, k-1] = C[j, k-1] + (4/5) * r4 * zc_s_over_s
+                    M[j, k] = 1
+                    M[j+1, k] = 1
+                    M[j-1, k] = 1
+                    M[j, k+1] = 1
+                    M[j, k-1] = 1
+                    g = two_d_s_over_s_zc * ((2*abs_z/Zc) - 1) * Zc
+                    e = e + g
+                else:
+                    continue
+
+        if e > 0:  # Update the grid if energy is positive
+            B += C
+            C = np.zeros((N+2, N+2), dtype=np.float32)
+        else:  # Randomly update a cell if energy is non-positive
+            if i > iterations: # This guarantees that it ends after 0 energy release
+                keep_going = False
+            for j in range(1, N+1):
+                for k in range(1, N+1):
+                    B[j, k] = B[j, k] * (1 + eps)
+
+        # Set boundary conditions
+        B[0, :] = 0
+        B[:, 0] = 0
+        B[N+1, :] = 0
+        B[:, N+1] = 0
+        M[0, :] = 0
+        M[:, 0] = 0
+        M[N+1, :] = 0
+        M[:, N+1] = 0
+
+        # Append energy values to lists
+        e_lib.append(e)
+        e_tot.append(np.sum(np.square(B)))
+        grid_list.append(B.copy())
+        area_list.append(M)
+
+        M = np.zeros((N+2, N+2), dtype=np.float32)  # Reset M matrix
+
+    del grid_list[0]  # Delete initial grid from the list
+    del area_list[0]  # Delete initial area from the list
+
+    return e_lib, e_tot, B, grid_list, area_list  # Return the lists and final grid
+
 def simulacion_completa(B, N, Zc, iterations):
     retry = 1
 
