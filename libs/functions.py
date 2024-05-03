@@ -363,6 +363,7 @@ def simulacion_completa(B, N, Zc, iterations, model):
             # lista_de_clusters_tot = []
             number_of_clusters_tot = []
             cluster_sizes_tot = []
+            fractal_index_tot = []
 
             chunks_range = 2000
 
@@ -449,6 +450,10 @@ def simulacion_completa(B, N, Zc, iterations, model):
                 # Cluster sizes for all avalanches
                 cluster_sizes = [item for cluster_matrix in lista_de_clusters for item in np.unique(cluster_matrix.data, return_counts=True)[
                     1][0:cluster_matrix.max()]]
+                
+                # start_time = time()
+                fractal_index_i = [fractal_index(matrix) for matrix in areas_de_avalanchas]
+                # time_execution_logger.log(TIME_EXECUTION, "fractal_index Standard: --- %.4f seconds ---" % (time() - start_time))
 
 
                 e_lib_tot = e_lib_tot + e_lib
@@ -462,6 +467,7 @@ def simulacion_completa(B, N, Zc, iterations, model):
                 # lista_de_clusters_tot += lista_de_clusters
                 number_of_clusters_tot += number_of_clusters
                 cluster_sizes_tot += cluster_sizes
+                fractal_index_tot += fractal_index_i
                 del lista_de_grillas
                 del lista_de_areas
                 del areas_de_avalanchas
@@ -478,4 +484,4 @@ def simulacion_completa(B, N, Zc, iterations, model):
         except:
             pass
 
-    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot
+    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot, fractal_index_tot

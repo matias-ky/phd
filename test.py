@@ -8,6 +8,11 @@ from libs.utils import *
 import numpy as np
 from time import time
 import os
+import logging
+
+# Set logging level
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=TIME_EXECUTION)
 
 # Set the program seed for consistency over the simulations
 set_seed(7)
@@ -43,7 +48,7 @@ iterations = 100
 
 # Standard
 start_time = time()
-e_lib_st, e_tot_st, B_st, avalanche_covered_areas_st, number_of_nodes_at_peak_st, number_of_nodes_per_avalanche_st, number_of_clusters_st, cluster_sizes_st = simulacion_completa(B_N62, N, Zc, iterations, "standard")
+e_lib_st, e_tot_st, B_st, avalanche_covered_areas_st, number_of_nodes_at_peak_st, number_of_nodes_per_avalanche_st, number_of_clusters_st, cluster_sizes_st, fractal_index_st = simulacion_completa(B_N62, N, Zc, iterations, "standard")
 print("LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
 print(len(e_lib_st))
 # plt.plot(e_tot_st)
@@ -51,7 +56,7 @@ print(len(e_lib_st))
 
 # Deterministic
 start_time = time()
-e_lib_det, e_tot_det, B_det, avalanche_covered_areas_det, number_of_nodes_at_peak_det, number_of_nodes_per_avalanche_det, number_of_clusters_det, cluster_sizes_det = simulacion_completa(B_N62, N, Zc, iterations, "deterministic")
+e_lib_det, e_tot_det, B_det, avalanche_covered_areas_det, number_of_nodes_at_peak_det, number_of_nodes_per_avalanche_det, number_of_clusters_det, cluster_sizes_det, fractal_index_det = simulacion_completa(B_N62, N, Zc, iterations, "deterministic")
 print("LU&H Deterministic: --- %.4f seconds ---" % (time() - start_time))
 print(len(e_lib_det))
 # plt.plot(e_tot_det)
@@ -59,7 +64,7 @@ print(len(e_lib_det))
 
 # Deterministic Global Driving with Random Redistribution
 start_time = time()
-e_lib_dgdrr, e_tot_dgdrr, B_dgdrr, avalanche_covered_areas_dgdrr, number_of_nodes_at_peak_dgdrr, number_of_nodes_per_avalanche_dgdrr, number_of_clusters_dgdrr, cluster_sizes_dgdrr = simulacion_completa(B_N62, N, Zc, iterations, "random_redistribution")
+e_lib_dgdrr, e_tot_dgdrr, B_dgdrr, avalanche_covered_areas_dgdrr, number_of_nodes_at_peak_dgdrr, number_of_nodes_per_avalanche_dgdrr, number_of_clusters_dgdrr, cluster_sizes_dgdrr, fractal_index_dgdrr = simulacion_completa(B_N62, N, Zc, iterations, "random_redistribution")
 print("LU&H Deterministic Global Driving with Random Redistribution: --- %.4f seconds ---" % (time() - start_time))
 print(len(e_lib_dgdrr))
 # plt.plot(e_tot_dgdrr)
@@ -68,6 +73,24 @@ print(len(e_lib_dgdrr))
 # %%
 
 fit = True
+
+# Fractal Index (D)
+xe, ye, fit_ye = distribution_to_plot(fractal_index_st, normal=True)
+distribution_plot(xe, ye, None, "D_{st}",
+                  scale=None, fit=False, save=True)
+
+logging.info("Mean Fractal Index St: " + str(np.mean(fractal_index_st)))
+
+xe, ye, fit_ye = distribution_to_plot(fractal_index_det, normal=True)
+distribution_plot(xe, ye, None, "D_{det}",
+                  scale=None, fit=False, save=True)
+
+logging.info("Mean Fractal Index det: " + str(np.mean(fractal_index_det)))
+
+xe, ye, fit_ye = distribution_to_plot(fractal_index_dgdrr, normal=True)
+distribution_plot(xe, ye, None, "D_{dgdrr}",
+                    scale=None, fit=False, save=True)
+
 
 # Number of clusters distribution
 logging.info("Number of clusters distribution")
