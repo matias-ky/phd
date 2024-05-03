@@ -151,6 +151,28 @@ start_time = time()
 number_of_clusters_dgdrr = [cluster_matrix.max()
                             for cluster_matrix in cluster_list_dgdrr]
 time_execution_logger.log(TIME_EXECUTION, "number_of_clusters_dgdrr DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
+
+fit=False
+
+# Number of clusters distribution
+logging.info("Number of clusters distribution")
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(number_of_clusters_st, normal=True)
+distribution_plot(xe, ye, fit_ye, "NC_{st}",
+                  scale=None, fit=False, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
+
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(number_of_clusters_det, normal=True)
+distribution_plot(xe, ye, fit_ye, "NC_{det}",
+                  scale=None, fit=False, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
+
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(number_of_clusters_dgdrr, normal=True)
+distribution_plot(xe, ye, fit_ye, "NC_{dgdrr}",
+                    scale=None, fit=False, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
 # %%
 
 # Cluster sizes for all avalanches
@@ -169,7 +191,7 @@ cluster_sizes_dgdrr = [item for cluster_matrix in cluster_list_dgdrr for item in
     1][0:cluster_matrix.max()]]
 time_execution_logger.log(TIME_EXECUTION, "cluster_sizes_dgdrr DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
 
-fit=True
+# fit=True
 
 # Cluster Sizes Distribution
 logging.info("Cluster Sizes Distribution (CS)")
