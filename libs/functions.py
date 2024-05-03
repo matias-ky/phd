@@ -346,7 +346,7 @@ def dgd_random_redistribution(B, N, Zc, iterations, eps=0.001):
 
     return e_lib, e_tot, B, grid_list, area_list  # Return the lists and final grid
 
-def simulacion_completa(B, N, Zc, iterations):
+def simulacion_completa(B, N, Zc, iterations, model):
     retry = 1
 
     for _ in range(retry):
@@ -358,8 +358,11 @@ def simulacion_completa(B, N, Zc, iterations):
             e_tot_tot = []
             B_tot = []
             areas_cubiertas_tot = []
+            number_of_nodes_at_peak_tot = []
             cantidad_de_nodos_en_avalanchas_tot = []
-            lista_de_clusters_tot = []
+            # lista_de_clusters_tot = []
+            number_of_clusters_tot = []
+            cluster_sizes_tot = []
 
             chunks_range = 2000
 
@@ -367,15 +370,24 @@ def simulacion_completa(B, N, Zc, iterations):
                 # start_time_iter = time()
                 # print("Arranca iteracion " + str(iter_tot))
 
-                # # DETERMINISTA
-                # start_time = time()
-                # e_lib, e_tot, B, lista_de_grillas, lista_de_areas = auto_cel_D(
-                #     B, Z_c=1, N_i=10000, eps=0.001, D_nc=0.1)
-                # print("--- %.4f seconds --- e_lib" % (time() - start_time))
-
                 # CLÁSICO
                 # start_time = time()
-                e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_standard(B, N, Zc, iterations)
+                if model == "standard":
+                    e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_standard(B, N, Zc, iterations)
+                # print("--- %.4f seconds --- e_lib" % (time() - start_time))
+
+                # DETERMINISTA
+                # start_time = time()
+                if model == "deterministic":
+                    e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_deterministic(
+                        B, Z_c=Zc, N_i=iterations, eps=0.001, D_nc=0.1)
+                # print("--- %.4f seconds --- e_lib" % (time() - start_time))
+
+                # RANDOM REDISTRIBUTION
+                # start_time = time()
+                if model == "random_redistribution":
+                    e_lib, e_tot, B, lista_de_grillas, lista_de_areas = dgd_random_redistribution(
+                        B, N, Zc, iterations, eps=0.001)
                 # print("--- %.4f seconds --- e_lib" % (time() - start_time))
 
                 # # start_time = time()
@@ -404,6 +416,9 @@ def simulacion_completa(B, N, Zc, iterations):
                 # areas_cubiertas = calcular_areas_cubiertas(
                 #     typed_areas_de_avalanchas)
 
+                # Number of nodes at the avalanche peak
+                number_of_nodes_at_peak = node_count_in_avalanches_peak(areas_de_avalanchas_por_avalancha)
+
                 # start_time = time()
                 cantidad_de_nodos_en_avalanchas = node_count_in_avalanche(
                     areas_de_avalanchas_por_avalancha)
@@ -427,15 +442,31 @@ def simulacion_completa(B, N, Zc, iterations):
                 # print("--- %.4f seconds --- hoshen kopelman" %
                 #     (time() - start_time))
 
+                # Number of clusters per avalanche areas
+                number_of_clusters = [cluster_matrix.max()
+                                        for cluster_matrix in lista_de_clusters]
+                
+                # Cluster sizes for all avalanches
+                cluster_sizes = [item for cluster_matrix in lista_de_clusters for item in np.unique(cluster_matrix.data, return_counts=True)[
+                    1][0:cluster_matrix.max()]]
+
+
                 e_lib_tot = e_lib_tot + e_lib
                 e_tot_tot = e_tot_tot + e_tot
                 B_tot.extend(B)
                 areas_cubiertas_tot = areas_cubiertas_tot + areas_cubiertas
+                number_of_nodes_at_peak_tot = number_of_nodes_at_peak_tot + \
+                    number_of_nodes_at_peak
                 cantidad_de_nodos_en_avalanchas_tot = cantidad_de_nodos_en_avalanchas_tot + \
                     cantidad_de_nodos_en_avalanchas
-                lista_de_clusters_tot += lista_de_clusters
+                # lista_de_clusters_tot += lista_de_clusters
+                number_of_clusters_tot += number_of_clusters
+                cluster_sizes_tot += cluster_sizes
                 del lista_de_grillas
                 del lista_de_areas
+                del areas_de_avalanchas
+                del areas_de_avalanchas_por_avalancha
+                del lista_de_clusters
 
                 # print("--- %.4f seconds --- iter" % (time() - start_time_iter))
                 if iter_tot%(chunks_range/10) == 0:
@@ -447,4 +478,4 @@ def simulacion_completa(B, N, Zc, iterations):
         except:
             pass
 
-    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, cantidad_de_nodos_en_avalanchas_tot, lista_de_clusters_tot
+    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot

@@ -168,9 +168,31 @@ start_time = time()
 cluster_sizes_dgdrr = [item for cluster_matrix in cluster_list_dgdrr for item in np.unique(cluster_matrix.data, return_counts=True)[
     1][0:cluster_matrix.max()]]
 time_execution_logger.log(TIME_EXECUTION, "cluster_sizes_dgdrr DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
-# %%
 
 fit=True
+
+# Cluster Sizes Distribution
+logging.info("Cluster Sizes Distribution (CS)")
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(cluster_sizes_st)
+distribution_plot(xe, ye, fit_ye, "CS_{st}",
+                    scale="log", fit=fit, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
+
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(cluster_sizes_det)
+distribution_plot(xe, ye, fit_ye, "CS_{det}",
+                    scale="log", fit=fit, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
+
+start_time = time()
+xe, ye, fit_ye = distribution_to_plot(cluster_sizes_dgdrr)
+distribution_plot(xe, ye, fit_ye, "CS_{dgdrr}",
+                    scale="log", fit=fit, save=True)
+time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
+# %%
+
+# fit=True
 
 # A
 logging.info("A")
@@ -381,7 +403,6 @@ distribution_plot(xe, ye, fit_ye, "P_{det}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "P distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
-# TODO: Try non-log scale for P_dgdrr distribution
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(P_dgdrr)
 distribution_plot(xe, ye, fit_ye, "P_{dgdrr}",
@@ -422,6 +443,7 @@ distribution_plot(xe, ye, fit_ye, "t_{P_{det}}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_P distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
+# TODO: Try non-log scale for t_P_dgdrr distribution
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_P_dgdrr)
 distribution_plot(xe, ye, fit_ye, "t_{P_{dgdrr}}",
@@ -462,6 +484,7 @@ distribution_plot(xe, ye, fit_ye, "t_{{ii}_{det}}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "t_ii distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
+# TODO: Try non-log scale for t_P_dgdrr distribution
 start_time = time()
 xe, ye, fit_ye = distribution_to_plot(t_ii_dgdrr)
 distribution_plot(xe, ye, fit_ye, "t_{{ii}_{dgdrr}}",

@@ -27,12 +27,12 @@ N = 62
 Zc = 1
 iterations = 1
 
+# TODO: Fix bug with lu_ham_standard compilation function. If not commented, it will make B matrix not to be in SOC state.
 # Compile Numba jit function for cellular automaton
-_, _, _, _, _ = lu_ham_standard(
-    B_N62, N, Zc, iterations)
-
-_, _, _, _, _ = lu_ham_deterministic(
-    B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
+# _, _, _, _, _ = lu_ham_standard(
+#     B_N62, N, Zc, iterations)
+# _, _, _, _, _ = lu_ham_deterministic(
+#     B_N62, Z_c=1, N_i=iterations, eps=0.001, D_nc=0.1)
 
 # %%
 
@@ -43,6 +43,8 @@ iterations = 10
 
 # Standard
 start_time = time()
-e_lib_st, e_tot_st, B_st, areas_cubiertas_st, cantidad_de_nodos_en_avalanchas_st, lista_de_clusters_st = simulacion_completa(B_N62, N, Zc, iterations)
+e_lib_st, e_tot_st, B_st, areas_cubiertas_st, number_of_nodes_at_peak, cantidad_de_nodos_en_avalanchas_st, number_of_clusters_st, cluster_sizes_st = simulacion_completa(B_N62, N, Zc, iterations, "standard")
 print("LU&H Standard: --- %.4f seconds ---" % (time() - start_time))
 print(len(e_lib_st))
+plt.plot(e_tot_st)
+plt.show()
