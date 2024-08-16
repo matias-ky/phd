@@ -91,6 +91,8 @@ xe, ye, fit_ye = distribution_to_plot(fractal_index_dgdrr, normal=True)
 distribution_plot(xe, ye, None, "D_{dgdrr}",
                     scale=None, fit=False, save=True)
 
+logging.info("Mean Fractal Index dgdrr: " + str(np.mean(fractal_index_dgdrr)))
+
 
 # Number of clusters distribution
 logging.info("Number of clusters distribution")
