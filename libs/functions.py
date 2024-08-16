@@ -452,7 +452,8 @@ def simulacion_completa(B, N, Zc, iterations, model):
                     1][0:cluster_matrix.max()]]
                 
                 # start_time = time()
-                fractal_index_i = [fractal_index(matrix) for matrix in areas_de_avalanchas]
+                avalanche_areas_min = 1
+                fractal_index_i = [fractal_index(matrix) for matrix in areas_de_avalanchas if np.count_nonzero(np.array(matrix)) > avalanche_areas_min]
                 # time_execution_logger.log(TIME_EXECUTION, "fractal_index Standard: --- %.4f seconds ---" % (time() - start_time))
 
 
