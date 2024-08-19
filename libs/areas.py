@@ -425,27 +425,22 @@ def fractal_index(matrix):
 
     return fractal_dimension
 
-# def box_count(matrix, box_size):
-#     count = 0
-#     rows, cols = matrix.shape
-
-#     for i in range(0, rows, box_size):
-#         for j in range(0, cols, box_size):
-#             if np.any(matrix[i:i+box_size, j:j+box_size]):
-#                 count += 1
-
-#     return count
+# def fractal_index(Z, threshold=0.25):
+#     def boxcount(Z, k):
+#         S = np.add.reduceat(
+#             np.add.reduceat(Z, np.arange(0, Z.shape[0], k), axis=0),
+#                                np.arange(0, Z.shape[1], k), axis=1)
+#         return len(np.where((S > 0) & (S < k*k))[0])
+#     Z = (Z < threshold)
+#     p = min(Z.shape)
+#     n = 2**np.floor(np.log(p)/np.log(2))
+#     n = int(np.log(n)/np.log(2))
+#     sizes = 2**np.arange(n, 1, -1)
+#     counts = []
+#     for size in sizes:
+#         counts.append(boxcount(Z, size))
+#     coeffs = np.polyfit(np.log(sizes), np.log(counts), 1)
+#     return -coeffs[0]
 
 # def fractal_index(matrix):
-#     sizes = 2**np.arange(1, int(min(np.log2(matrix.shape))) + 1)
-#     counts = []
-
-#     for size in sizes:
-#         count = box_count(matrix, size)
-#         counts.append(count)
-
-#     # Fit a linear regression to calculate the fractal dimension
-#     coeffs = np.polyfit(np.log(sizes), np.log(counts), 1)
-#     fractal_dimension = -coeffs[0]
-
-#     return fractal_dimension
+#     return np.log(np.count_nonzero(np.array(matrix)))/np.log(1/(1/len(matrix)))
