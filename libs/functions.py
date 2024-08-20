@@ -346,7 +346,89 @@ def dgd_random_redistribution(B, N, Zc, iterations, eps=0.001):
 
     return e_lib, e_tot, B, grid_list, area_list  # Return the lists and final grid
 
-def simulacion_completa(B, N, Zc, iterations, model):
+@jit(nopython=True)
+def dgd_stochastic_threshold(B, N, iterations, eps=0.001, mu=1, sigma=0.001):
+    """
+    Deterministic Global Driving with Stochastic Threshold.
+    """
+
+    C = np.zeros((N+2, N+2), dtype=np.float32)  # Initialize C matrix
+    M = np.zeros((N+2, N+2), dtype=np.float32)  # Initialize M matrix
+    D = 2  # Dimension
+    s = 2*D+1  # 5 for 2D lattice
+    grid_list = [B]  # Initialize list to store grids
+    area_list = [B]  # Initialize list to store areas
+    e_lib = []  # Initialize list to store e values
+    e_tot = []  # Initialize list to store total energy values
+
+    keep_going = True
+    i = 0
+
+    while keep_going:
+        i += 1
+        e = 0  # Initialize energy variable
+
+        # mu, sigma = 1, 0.001 # mean and standard deviation
+        Zc = np.random.normal(mu, sigma)
+
+        # Iterate through the grid
+        for j in range(1, N+1):
+            for k in range(1, N+1):
+                Z = B[j, k] - (1/(2*D)) * (B[j+1, k] +
+                                           B[j-1, k] + B[j, k+1] + B[j, k-1])
+                abs_z = abs(Z)
+
+                # Check if condition is met for energy update
+                if abs_z > Zc:
+                    C[j, k] = C[j, k] - ((2*D) / s) * Zc
+                    C[j+1, k] = C[j+1, k] + Zc / s
+                    C[j-1, k] = C[j-1, k] + Zc / s
+                    C[j, k+1] = C[j, k+1] + Zc / s
+                    C[j, k-1] = C[j, k-1] + Zc / s
+                    M[j, k] = 1
+                    M[j+1, k] = 1
+                    M[j-1, k] = 1
+                    M[j, k+1] = 1
+                    M[j, k-1] = 1
+                    g = ((2*D) / s) * Zc * ((2*abs_z/Zc) - 1) * Zc
+                    e = e + g
+                else:
+                    continue
+
+        if e > 0:  # Update the grid if energy is positive
+            B += C
+            C = np.zeros((N+2, N+2), dtype=np.float32)
+        else:  # Randomly update a cell if energy is non-positive
+            if i > iterations: # This guarantees that it ends after 0 energy release
+                keep_going = False
+            for j in range(1, N+1):
+                for k in range(1, N+1):
+                    B[j, k] = B[j, k] * (1 + eps)
+
+        # Set boundary conditions
+        B[0, :] = 0
+        B[:, 0] = 0
+        B[N+1, :] = 0
+        B[:, N+1] = 0
+        M[0, :] = 0
+        M[:, 0] = 0
+        M[N+1, :] = 0
+        M[:, N+1] = 0
+
+        # Append energy values to lists
+        e_lib.append(e)
+        e_tot.append(np.sum(np.square(B)))
+        grid_list.append(B.copy())
+        area_list.append(M)
+
+        M = np.zeros((N+2, N+2), dtype=np.float32)  # Reset M matrix
+
+    del grid_list[0]  # Delete initial grid from the list
+    del area_list[0]  # Delete initial area from the list
+
+    return e_lib, e_tot, B, grid_list, area_list  # Return the lists and final grid
+
+def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
     retry = 1
 
     for _ in range(retry):
@@ -390,6 +472,12 @@ def simulacion_completa(B, N, Zc, iterations, model):
                     e_lib, e_tot, B, lista_de_grillas, lista_de_areas = dgd_random_redistribution(
                         B, N, Zc, iterations, eps=0.001)
                 # print("--- %.4f seconds --- e_lib" % (time() - start_time))
+
+                # STOCHASTIC THRESHOLD
+                # start_time = time()
+                if model == "stochastic_threshold":
+                    e_lib, e_tot, B, lista_de_grillas, lista_de_areas = dgd_stochastic_threshold(
+                        B, N, iterations, eps=0.001, mu=mu, sigma=sigma)
 
                 # # start_time = time()
                 # # grillas_con_nodos_inestables = nodos_inestables(np.array(lista_de_grillas), Zc,
