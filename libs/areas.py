@@ -233,6 +233,26 @@ def node_count_in_avalanches_peak(avalanche_areas_per_avalanche):
 
     return number_of_nodes_at_peak
 
+def node_count_in_avalanches_peak(avalanche_areas_per_avalanche):
+    """
+    Calculate the number of nodes at the peak of each avalanche.
+    """
+
+    number_of_nodes_at_peak = []
+    fractal_indexes_at_peak = []
+
+    for i in range(len(avalanche_areas_per_avalanche)):
+        max_nodes = 0
+        peak_index = -1
+        for matrices in avalanche_areas_per_avalanche[i]:
+            nodes = np.count_nonzero(np.array(matrices))
+            if nodes > max_nodes:
+                max_nodes = nodes
+            peak_index += 1
+        number_of_nodes_at_peak.append(max_nodes)
+        fractal_indexes_at_peak.append(fractal_index(avalanche_areas_per_avalanche[i][peak_index]))
+
+    return number_of_nodes_at_peak, fractal_indexes_at_peak
 
 def unstable_nodes_before_avalanche(unstable_grids, e_lib):
     """

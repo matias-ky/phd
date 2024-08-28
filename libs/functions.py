@@ -418,8 +418,8 @@ def dgd_stochastic_threshold(B, N, iterations, eps=0.001, mu=1, sigma=0.001):
         # Append energy values to lists
         e_lib.append(e)
         e_tot.append(np.sum(np.square(B)))
-        grid_list.append(B.copy())
-        area_list.append(M)
+        # grid_list.append(B.copy())
+        # area_list.append(M)
 
         M = np.zeros((N+2, N+2), dtype=np.float32)  # Reset M matrix
 
@@ -446,6 +446,7 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
             number_of_clusters_tot = []
             cluster_sizes_tot = []
             fractal_index_tot = []
+            fractal_indexes_at_peak_tot = []
 
             chunks_range = 2000
 
@@ -506,7 +507,12 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
                 #     typed_areas_de_avalanchas)
 
                 # Number of nodes at the avalanche peak
-                number_of_nodes_at_peak = node_count_in_avalanches_peak(areas_de_avalanchas_por_avalancha)
+                # number_of_nodes_at_peak = node_count_in_avalanches_peak(areas_de_avalanchas_por_avalancha)
+                # print("hola")
+
+                number_of_nodes_at_peak, fractal_indexes_at_peak = node_count_in_avalanches_peak(
+                    areas_de_avalanchas_por_avalancha)
+                # print("chau")
 
                 # start_time = time()
                 cantidad_de_nodos_en_avalanchas = node_count_in_avalanche(
@@ -557,6 +563,7 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
                 number_of_clusters_tot += number_of_clusters
                 cluster_sizes_tot += cluster_sizes
                 fractal_index_tot += fractal_index_i
+                fractal_indexes_at_peak_tot += fractal_indexes_at_peak
                 del lista_de_grillas
                 del lista_de_areas
                 del areas_de_avalanchas
@@ -573,4 +580,4 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
         except:
             pass
 
-    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot, fractal_index_tot
+    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot, fractal_index_tot, fractal_indexes_at_peak_tot
