@@ -44,7 +44,7 @@ iterations = 1
 # Run simulation with increased iterations (for each X iterations, there are Y chunks, so total will be X*Y)
 # For example use 10 iterations and 2000 chunks, so total will be 20000 iterations
 # However, simulation ends only when energy release is 0, so the number will mostly be higher than 20000
-iterations = 1000
+iterations = 100
 
 # Standard
 start_time = time()
@@ -113,23 +113,42 @@ logging.info("Mean Fractal Index dgdst: " + str(np.mean(fractal_index_dgdst)))
 logging.info("Max Fractal Index dgdst: " + str(np.max(fractal_index_dgdst)))
 
 # Fractal Index (D*) at peak
-xe, ye, fit_ye = distribution_to_plot(fractal_indexes_at_peak_st, normal=True)
-distribution_plot(xe, ye, None, "D^{*}_{st}",
+xe_d_p_st, ye_d_p_st, fit_ye = distribution_to_plot(fractal_indexes_at_peak_st, normal=True)
+distribution_plot(xe_d_p_st, ye_d_p_st, None, "D^{*}_{st}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak St: " + str(np.mean(fractal_indexes_at_peak_st)))
 logging.info("Max Fractal Index at peak St: " + str(np.max(fractal_indexes_at_peak_st)))
 
-xe, ye, fit_ye = distribution_to_plot(fractal_indexes_at_peak_det, normal=True)
-distribution_plot(xe, ye, None, "D^{*}_{det}",
+xe_d_p_det, ye_d_p_det, fit_ye = distribution_to_plot(fractal_indexes_at_peak_det, normal=True)
+distribution_plot(xe_d_p_det, ye_d_p_det, None, "D^{*}_{det}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak det: " + str(np.mean(fractal_indexes_at_peak_det)))
 logging.info("Max Fractal Index at peak det: " + str(np.max(fractal_indexes_at_peak_det)))
 
-xe, ye, fit_ye = distribution_to_plot(fractal_indexes_at_peak_dgdrr, normal=True)
-distribution_plot(xe, ye, None, "D^{*}_{dgdrr}",
+xe_d_p_dgdrr, ye_d_p_dgdrr, fit_ye = distribution_to_plot(fractal_indexes_at_peak_dgdrr, normal=True)
+distribution_plot(xe_d_p_dgdrr, ye_d_p_dgdrr, None, "D^{*}_{dgdrr}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak dgdrr: " + str(np.mean(fractal_indexes_at_peak_dgdrr)))
 logging.info("Max Fractal Index at peak dgdrr: " + str(np.max(fractal_indexes_at_peak_dgdrr)))
+
+# Plots with dotted lines
+plt.plot(xe_d_p_st, ye_d_p_st, linestyle='--', marker='o', label='Standard')
+plt.plot(xe_d_p_det, ye_d_p_det, linestyle='--', marker='s', label='Deterministic')
+plt.plot(xe_d_p_dgdrr, ye_d_p_dgdrr, linestyle='--', marker='^', label='Random Redistribution')
+# Adding title and labels
+# plt.title("Comparison of Models with Dotted Lines")
+plt.xlabel(r"$D^{*}$")
+plt.ylabel(r"PDF($D^{*}$)")
+# Adding grid
+plt.grid(True)
+# Adding legend
+plt.legend()
+# Tight layout for better spacing
+plt.tight_layout()
+# Show plot
+plt.show()
+
+exit()
 
 # Number of clusters distribution
 logging.info("Number of clusters distribution")
