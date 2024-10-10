@@ -21,16 +21,18 @@ set_seed(7)
 
 # Load data for N = 62
 current_directory = os.getcwd()
-data_N62 = np.load(current_directory + "/initial_grids/B_N62_Zc1.npz")
+# data_N62 = np.load(current_directory + "/initial_grids/B_N62_Zc1.npz")
+data_N62 = np.load(current_directory + "/initial_grids/B_N128_Zc1.npz")
 B_N62 = data_N62["B"]
 B_N62 = B_N62.astype(np.float32)
 
 # %%
 
 # Set simulation parameters
-N = 62
+# N = 62
+N = 128
 Zc = 1
-iterations = 1
+# iterations = 1
 
 # TODO: Fix bug with lu_ham_standard compilation function. If not commented, it will make B matrix not to be in SOC state.
 # Compile Numba jit function for cellular automaton
@@ -44,7 +46,7 @@ iterations = 1
 # Run simulation with increased iterations (for each X iterations, there are Y chunks, so total will be X*Y)
 # For example use 10 iterations and 2000 chunks, so total will be 20000 iterations
 # However, simulation ends only when energy release is 0, so the number will mostly be higher than 20000
-iterations = 100
+iterations = 1000
 
 # Standard
 start_time = time()
@@ -79,7 +81,7 @@ print(len(e_lib_dgdrr))
 # plt.show()
 
 e_lib_dgdst, e_tot_dgdst, B_dgdst, avalanche_covered_areas_dgdst, number_of_nodes_at_peak_dgdst, number_of_nodes_per_avalanche_dgdst, number_of_clusters_dgdst, cluster_sizes_dgdst, fractal_index_dgdst = e_lib_dgdrr, e_tot_dgdrr, B_dgdrr, avalanche_covered_areas_dgdrr, number_of_nodes_at_peak_dgdrr, number_of_nodes_per_avalanche_dgdrr, number_of_clusters_dgdrr, cluster_sizes_dgdrr, fractal_index_dgdrr
-
+# exit()
 # %%
 
 fit = True
@@ -145,10 +147,13 @@ plt.grid(True)
 plt.legend()
 # Tight layout for better spacing
 plt.tight_layout()
+# Save plot
+plt.savefig("plots/pdf/plot_D^{*}.pdf")
+plt.savefig("plots/png/plot_D^{*}.png", dpi=300)
 # Show plot
-plt.show()
+# plt.show()
 
-exit()
+# exit()
 
 # Number of clusters distribution
 logging.info("Number of clusters distribution")

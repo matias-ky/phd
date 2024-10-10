@@ -464,14 +464,14 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
                 # start_time = time()
                 if model == "deterministic":
                     e_lib, e_tot, B, lista_de_grillas, lista_de_areas = lu_ham_deterministic(
-                        B, Z_c=Zc, N_i=iterations, eps=0.001, D_nc=0.1)
+                        B, Z_c=Zc, N_i=iterations, eps=1e-6, D_nc=0.1)
                 # print("--- %.4f seconds --- e_lib" % (time() - start_time))
 
                 # RANDOM REDISTRIBUTION
                 # start_time = time()
                 if model == "random_redistribution":
                     e_lib, e_tot, B, lista_de_grillas, lista_de_areas = dgd_random_redistribution(
-                        B, N, Zc, iterations, eps=0.001)
+                        B, N, Zc, iterations, eps=1e-6)
                 # print("--- %.4f seconds --- e_lib" % (time() - start_time))
 
                 # STOCHASTIC THRESHOLD
