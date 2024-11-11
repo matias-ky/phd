@@ -87,26 +87,29 @@ e_lib_dgdst, e_tot_dgdst, B_dgdst, avalanche_covered_areas_dgdst, number_of_node
 fit = True
 
 # Fractal Index (D)
-xe, ye, fit_ye = distribution_to_plot(fractal_index_st, normal=True)
-distribution_plot(xe, ye, None, "D_{st}",
+xe_d_st, ye_d_st, fit_ye = distribution_to_plot(fractal_index_st, normal=True)
+distribution_plot(xe_d_st, ye_d_st, None, "D_{st}",
                   scale=None, fit=False, save=True)
 
 logging.info("Mean Fractal Index St: " + str(np.mean(fractal_index_st)))
 logging.info("Max Fractal Index St: " + str(np.max(fractal_index_st)))
+logging.info("--> Most Frequent Fractal Index St (Mode): " + str(xe_d_st[np.argmax(ye_d_st)]))
 
-xe, ye, fit_ye = distribution_to_plot(fractal_index_det, normal=True)
-distribution_plot(xe, ye, None, "D_{det}",
+xe_d_det, ye_d_det, fit_ye = distribution_to_plot(fractal_index_det, normal=True)
+distribution_plot(xe_d_det, ye_d_det, None, "D_{det}",
                   scale=None, fit=False, save=True)
 
 logging.info("Mean Fractal Index det: " + str(np.mean(fractal_index_det)))
 logging.info("Max Fractal Index det: " + str(np.max(fractal_index_det)))
+logging.info("--> Most Frequent Fractal Index det (Mode): " + str(xe_d_det[np.argmax(ye_d_det)]))
 
-xe, ye, fit_ye = distribution_to_plot(fractal_index_dgdrr, normal=True)
-distribution_plot(xe, ye, None, "D_{dgdrr}",
+xe_d_dgdrr, ye_d_dgdrr, fit_ye = distribution_to_plot(fractal_index_dgdrr, normal=True)
+distribution_plot(xe_d_dgdrr, ye_d_dgdrr, None, "D_{dgdrr}",
                     scale=None, fit=False, save=True)
 
 logging.info("Mean Fractal Index dgdrr: " + str(np.mean(fractal_index_dgdrr)))
 logging.info("Max Fractal Index dgdrr: " + str(np.max(fractal_index_dgdrr)))
+logging.info("--> Most Frequent Fractal Index dgdrr (Mode): " + str(xe_d_dgdrr[np.argmax(ye_d_dgdrr)]))
 
 xe, ye, fit_ye = distribution_to_plot(fractal_index_dgdst, normal=True)
 distribution_plot(xe, ye, None, "D_{dgdst}",
@@ -114,26 +117,52 @@ distribution_plot(xe, ye, None, "D_{dgdst}",
 logging.info("Mean Fractal Index dgdst: " + str(np.mean(fractal_index_dgdst)))
 logging.info("Max Fractal Index dgdst: " + str(np.max(fractal_index_dgdst)))
 
+# Plots with dotted lines
+plt.figure()
+plt.plot(xe_d_st, ye_d_st, linestyle='--', marker='o', label='Standard')
+plt.plot(xe_d_det, ye_d_det, linestyle='--', marker='s', label='Deterministic')
+plt.plot(xe_d_dgdrr, ye_d_dgdrr, linestyle='--', marker='^', label='Random Redistribution')
+# Adding title and labels
+# plt.title("Comparison of Models with Dotted Lines")
+plt.xlabel(r"$D$")
+plt.ylabel(r"PDF($D$)")
+# Adding grid
+plt.grid(True)
+# Adding legend
+plt.legend()
+# Tight layout for better spacing
+plt.tight_layout()
+# Save plot
+plt.savefig("plots/pdf/plot_D.pdf")
+plt.savefig("plots/png/plot_D.png", dpi=300)
+# Show plot
+# plt.show()
+# exit()
+
 # Fractal Index (D*) at peak
 xe_d_p_st, ye_d_p_st, fit_ye = distribution_to_plot(fractal_indexes_at_peak_st, normal=True)
 distribution_plot(xe_d_p_st, ye_d_p_st, None, "D^{*}_{st}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak St: " + str(np.mean(fractal_indexes_at_peak_st)))
 logging.info("Max Fractal Index at peak St: " + str(np.max(fractal_indexes_at_peak_st)))
+logging.info("--> Most Frequent Fractal Index at peak St (Mode): " + str(xe_d_p_st[np.argmax(ye_d_p_st)]))
 
 xe_d_p_det, ye_d_p_det, fit_ye = distribution_to_plot(fractal_indexes_at_peak_det, normal=True)
 distribution_plot(xe_d_p_det, ye_d_p_det, None, "D^{*}_{det}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak det: " + str(np.mean(fractal_indexes_at_peak_det)))
 logging.info("Max Fractal Index at peak det: " + str(np.max(fractal_indexes_at_peak_det)))
+logging.info("--> Most Frequent Fractal Index at peak det (Mode): " + str(xe_d_p_det[np.argmax(ye_d_p_det)]))
 
 xe_d_p_dgdrr, ye_d_p_dgdrr, fit_ye = distribution_to_plot(fractal_indexes_at_peak_dgdrr, normal=True)
 distribution_plot(xe_d_p_dgdrr, ye_d_p_dgdrr, None, "D^{*}_{dgdrr}",
                     scale=None, fit=False, save=True)
 logging.info("Mean Fractal Index at peak dgdrr: " + str(np.mean(fractal_indexes_at_peak_dgdrr)))
 logging.info("Max Fractal Index at peak dgdrr: " + str(np.max(fractal_indexes_at_peak_dgdrr)))
+logging.info("--> Most Frequent Fractal Index at peak dgdrr (Mode): " + str(xe_d_p_dgdrr[np.argmax(ye_d_p_dgdrr)]))
 
 # Plots with dotted lines
+plt.figure()
 plt.plot(xe_d_p_st, ye_d_p_st, linestyle='--', marker='o', label='Standard')
 plt.plot(xe_d_p_det, ye_d_p_det, linestyle='--', marker='s', label='Deterministic')
 plt.plot(xe_d_p_dgdrr, ye_d_p_dgdrr, linestyle='--', marker='^', label='Random Redistribution')
@@ -210,20 +239,20 @@ time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Stochastic T
 # A
 logging.info("A")
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_st)
-distribution_plot(xe, ye, fit_ye, "A_{st}",
+xe_a_st, ye_a_st, fit_ye_a_st = distribution_to_plot(avalanche_covered_areas_st)
+distribution_plot(xe_a_st, ye_a_st, fit_ye_a_st, "A_{st}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_det)
-distribution_plot(xe, ye, fit_ye, "A_{det}",
+xe_a_det, ye_a_det, fit_ye_a_det = distribution_to_plot(avalanche_covered_areas_det)
+distribution_plot(xe_a_det, ye_a_det, fit_ye_a_det, "A_{det}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(avalanche_covered_areas_dgdrr)
-distribution_plot(xe, ye, fit_ye, "A_{dgdrr}",
+xe_a_dgdrr, ye_a_dgdrr, fit_ye_a_dgdrr = distribution_to_plot(avalanche_covered_areas_dgdrr)
+distribution_plot(xe_a_dgdrr, ye_a_dgdrr, fit_ye_a_dgdrr, "A_{dgdrr}",
                     scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
 
@@ -233,23 +262,49 @@ distribution_plot(xe, ye, fit_ye, "A_{dgdst}",
                     scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Stochastic Threshold --- %.4f seconds ---" % (time() - start_time))
 
+# Plots with dotted lines
+plt.figure()
+# plt.plot(xe_a_st, ye_a_st, linestyle='--', marker='o', label='Standard')
+plt.plot(xe_a_det, ye_a_det, marker='s', label='Deterministic')
+plt.plot(xe_a_det, fit_ye_a_det, linestyle='--', label='Deterministic Fit')
+plt.plot(xe_a_dgdrr, ye_a_dgdrr, marker='^', label='Random Redistribution')
+plt.plot(xe_a_dgdrr, fit_ye_a_dgdrr, linestyle='-.', label='Random Redistribution Fit')
+plt.yscale("log")
+plt.xscale("log")
+# Adding title and labels
+# plt.title("Comparison of Models with Dotted Lines")
+plt.xlabel(r"$A$")
+plt.ylabel(r"PDF($A$)")
+# Adding grid
+plt.grid(True)
+# Adding legend
+plt.legend()
+# Tight layout for better spacing
+plt.tight_layout()
+# Save plot
+plt.savefig("plots/pdf/plot_A.pdf")
+plt.savefig("plots/png/plot_A.png", dpi=300)
+# Show plot
+# plt.show()
+# exit()
+
 # A*
 logging.info("A^{*}")
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_st)
-distribution_plot(xe, ye, fit_ye, "A^{*}_{st}",
+xe_a_p_st, ye_a_p_st, fit_ye_a_p_st = distribution_to_plot(number_of_nodes_at_peak_st)
+distribution_plot(xe_a_p_st, ye_a_p_st, fit_ye_a_p_st, "A^{*}_{st}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Standard: --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_det)
-distribution_plot(xe, ye, fit_ye, "A^{*}_{det}",
+xe_a_p_det, ye_a_p_det, fit_ye_a_p_det = distribution_to_plot(number_of_nodes_at_peak_det)
+distribution_plot(xe_a_p_det, ye_a_p_det, fit_ye_a_p_det, "A^{*}_{det}",
                   scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot Deterministic --- %.4f seconds ---" % (time() - start_time))
 
 start_time = time()
-xe, ye, fit_ye = distribution_to_plot(number_of_nodes_at_peak_dgdrr)
-distribution_plot(xe, ye, fit_ye, "A^{*}_{dgdrr}",
+xe_a_p_dgdrr, ye_a_p_dgdrr, fit_ye_a_p_dgdrr = distribution_to_plot(number_of_nodes_at_peak_dgdrr)
+distribution_plot(xe_a_p_dgdrr, ye_a_p_dgdrr, fit_ye_a_p_dgdrr, "A^{*}_{dgdrr}",
                     scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Random Redistribution --- %.4f seconds ---" % (time() - start_time))
 
@@ -259,6 +314,32 @@ distribution_plot(xe, ye, fit_ye, "A^{*}_{dgdst}",
                     scale="log", fit=fit, save=True)
 time_execution_logger.log(TIME_EXECUTION, "distribution_to_plot DGD Stochastic Threshold --- %.4f seconds ---" % (time() - start_time))
 
+
+# Plots with dotted lines
+plt.figure()
+# plt.plot(xe_a_st, ye_a_st, linestyle='--', marker='o', label='Standard')
+plt.plot(xe_a_p_det, ye_a_det, marker='s', label='Deterministic')
+plt.plot(xe_a_p_det, fit_ye_a_det, linestyle='--', label='Deterministic Fit')
+plt.plot(xe_a_p_dgdrr, ye_a_dgdrr, marker='^', label='Random Redistribution')
+plt.plot(xe_a_p_dgdrr, fit_ye_a_dgdrr, linestyle='-.', label='Random Redistribution Fit')
+plt.yscale("log")
+plt.xscale("log")
+# Adding title and labels
+# plt.title("Comparison of Models with Dotted Lines")
+plt.xlabel(r"$A^{*}$")
+plt.ylabel(r"PDF($A^{*}$)")
+# Adding grid
+plt.grid(True)
+# Adding legend
+plt.legend()
+# Tight layout for better spacing
+plt.tight_layout()
+# Save plot
+plt.savefig("plots/pdf/plot_A^{*}.pdf")
+plt.savefig("plots/png/plot_A^{*}.png", dpi=300)
+# Show plot
+# plt.show()
+# exit()
 # %%
 
 # Lista con índices donde estan los 0 de e_soc_st.
