@@ -7,7 +7,7 @@ import numpy as np
 import logging
 
 
-def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, fit=True, save=False):
+def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, fit=True, save=False, base_dir="plots"):
     """
     Generate a distribution plot.
 
@@ -27,6 +27,8 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
         Include the fit in the plot, by default True.
     save : bool, optional
         Save the plot as a PDF and PNG, by default False (not Save).
+    base_dir : str, optional
+        The base directory to save plots under, by default "plots".
 
     Returns
     -------
@@ -78,8 +80,13 @@ def distribution_plot(x_values, y_values, fitted_values, variable, scale=None, f
     plt.tight_layout()
 
     if save:
-        plt.savefig("plots/pdf/plot_"+variable+"_fit.pdf")
-        plt.savefig("plots/png/plot_"+variable+"_fit.png", dpi=300)
+        import os
+        pdf_dir = os.path.join(base_dir, "pdf")
+        png_dir = os.path.join(base_dir, "png")
+        os.makedirs(pdf_dir, exist_ok=True)
+        os.makedirs(png_dir, exist_ok=True)
+        plt.savefig(os.path.join(pdf_dir, "plot_"+variable+"_fit.pdf"))
+        plt.savefig(os.path.join(png_dir, "plot_"+variable+"_fit.png"), dpi=300)
     else:
         plt.show()
 

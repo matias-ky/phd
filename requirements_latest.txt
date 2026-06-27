@@ -1,0 +1,7 @@
+numpy
+matplotlib
+gif
+numba
+scipy
+scikit-image
+scikit-learn
