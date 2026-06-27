@@ -5,6 +5,7 @@ Refactored version of test.py with clean, modular, and reusable functions.
 """
 
 import os
+import re
 import logging
 import datetime
 import time as sys_time
@@ -59,6 +60,25 @@ MODELS_CONFIG = {
 
 # Base directory for the current run
 RUN_DIR = None
+
+
+def get_next_run_dir(base_dir="runs"):
+    """Return the next available run directory for today's date."""
+    date_folder = datetime.date.today().strftime("%d_%m_%Y")
+    date_dir = os.path.join(base_dir, date_folder)
+    os.makedirs(date_dir, exist_ok=True)
+
+    existing_indices = []
+    for entry in os.listdir(date_dir):
+        path = os.path.join(date_dir, entry)
+        if os.path.isdir(path):
+            match = re.match(r"^run_(\d{2})$", entry)
+            if match:
+                existing_indices.append(int(match.group(1)))
+
+    next_index = max(existing_indices) + 1 if existing_indices else 0
+    run_dir = os.path.join(date_dir, f"run_{next_index:02d}")
+    return run_dir
 
 
 class SimulationResult:
@@ -163,7 +183,16 @@ def plot_and_log_distribution(data, key_suffix, title, normal=False, semilog=Fal
     start_time = sys_time.time()
     xe, ye, fit_ye = distribution_to_plot(data, normal=normal, semilog=semilog)
     formatted_title = format_title_with_suffix(title, key_suffix)
-    distribution_plot(xe, ye, fit_ye, formatted_title, scale=scale, fit=fit, save=True, base_dir=RUN_DIR)
+    distribution_plot(
+        xe,
+        ye,
+        fit_ye,
+        formatted_title,
+        scale=scale,
+        fit=fit,
+        save=True,
+        base_dir=os.path.join(RUN_DIR, "plots")
+    )
     time_execution_logger.log(
         TIME_EXECUTION, 
         f"Distribution {title} for {key_suffix} plotted in --- {sys_time.time() - start_time:.4f} seconds ---"
@@ -196,8 +225,8 @@ def plot_comparison(datasets, xlabel, ylabel, filename, scale="linear"):
     plt.tight_layout()
     
     # Save the plots inside the run directory
-    pdf_dir = os.path.join(RUN_DIR, "pdf")
-    png_dir = os.path.join(RUN_DIR, "png")
+    pdf_dir = os.path.join(RUN_DIR, "plots", "pdf")
+    png_dir = os.path.join(RUN_DIR, "plots", "png")
     os.makedirs(pdf_dir, exist_ok=True)
     os.makedirs(png_dir, exist_ok=True)
     plt.savefig(os.path.join(pdf_dir, f"{filename}.pdf"))
@@ -208,13 +237,12 @@ def plot_comparison(datasets, xlabel, ylabel, filename, scale="linear"):
 def main():
     global RUN_DIR
     
-    # Generate run directory with timestamp
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    RUN_DIR = os.path.join("results", f"run_{timestamp}")
-    os.makedirs(os.path.join(RUN_DIR, "pdf"), exist_ok=True)
-    os.makedirs(os.path.join(RUN_DIR, "png"), exist_ok=True)
+    # Generate run directory using today's date and sequential numbering
+    RUN_DIR = get_next_run_dir()
+    os.makedirs(os.path.join(RUN_DIR, "plots", "pdf"), exist_ok=True)
+    os.makedirs(os.path.join(RUN_DIR, "plots", "png"), exist_ok=True)
     
-    # Setup logging to console and file inside the run directory
+    # Setup logging to file inside the run directory
     log_format = "%(asctime)s [%(levelname)s] %(message)s"
     log_file = os.path.join(RUN_DIR, "execution.log")
 
@@ -233,13 +261,13 @@ def main():
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
     
-    # Configure time execution logger to write to the log file as well
+    # Configure time execution logger to write to the log file and console as well
     time_execution_logger.handlers = []
     time_execution_logger.addHandler(file_handler)
     time_execution_logger.addHandler(console_handler)
     time_execution_logger.setLevel(TIME_EXECUTION)
     
-    logging.info("Starting run_%s", timestamp)
+    logging.info("Starting run folder %s", RUN_DIR)
     logging.info("Active models: %s", ", ".join(ACTIVE_MODELS))
     logging.info("Skipped models: %s", ", ".join([k for k in MODELS_CONFIG.keys() if k not in ACTIVE_MODELS]))
     
@@ -338,8 +366,8 @@ def main():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(os.path.join(RUN_DIR, "pdf/plot_A.pdf"))
-        plt.savefig(os.path.join(RUN_DIR, "png/plot_A.png"), dpi=300)
+        plt.savefig(os.path.join(RUN_DIR, "plots", "pdf", "plot_A.pdf"))
+        plt.savefig(os.path.join(RUN_DIR, "plots", "png", "plot_A.png"), dpi=300)
         plt.close()
     
     # --- 6. Number of Nodes at Peak (A*) ---
@@ -370,8 +398,8 @@ def main():
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(os.path.join(RUN_DIR, "pdf/plot_A^{*}.pdf"))
-        plt.savefig(os.path.join(RUN_DIR, "png/plot_A^{*}.png"), dpi=300)
+        plt.savefig(os.path.join(RUN_DIR, "plots", "pdf", "plot_A^{*}.pdf"))
+        plt.savefig(os.path.join(RUN_DIR, "plots", "png", "plot_A^{*}.png"), dpi=300)
         plt.close()
     
     # --- 7. Distribution Plotting Loop for Derived Metrics ---
@@ -406,9 +434,27 @@ def main():
         formatted_title = format_title_with_suffix("E_{{rel}}", model['label'])
         if key == "deterministic":
             # Apply identical slicing as original code
-            distribution_plot(xe[1:], ye[1:], fit_ye[1:], formatted_title, scale="log", fit=FIT_DISTRIBUTIONS, save=True, base_dir=RUN_DIR)
+            distribution_plot(
+                xe[1:],
+                ye[1:],
+                fit_ye[1:],
+                formatted_title,
+                scale="log",
+                fit=FIT_DISTRIBUTIONS,
+                save=True,
+                base_dir=os.path.join(RUN_DIR, "plots")
+            )
         else:
-            distribution_plot(xe, ye, fit_ye, formatted_title, scale="log", fit=FIT_DISTRIBUTIONS, save=True, base_dir=RUN_DIR)
+            distribution_plot(
+                xe,
+                ye,
+                fit_ye,
+                formatted_title,
+                scale="log",
+                fit=FIT_DISTRIBUTIONS,
+                save=True,
+                base_dir=os.path.join(RUN_DIR, "plots")
+            )
             
     # t_ac_pesado & t_rel_pesado (both use normal=True, fit=False)
     logging.info("Analyzing t_ac_pesado & t_rel_pesado...")
@@ -420,16 +466,40 @@ def main():
         # t_ac_pesado (slices xe[1:], ye[1:])
         xe, ye, fit_ye = distribution_to_plot(res.t_ac_pesado, normal=True)
         formatted_title_ac = format_title_with_suffix("t_{{{ac}_{{w}}}}", model['label'])
-        distribution_plot(xe[1:], ye[1:], fit_ye, formatted_title_ac, fit=False, save=True, base_dir=RUN_DIR)
+        distribution_plot(
+            xe[1:],
+            ye[1:],
+            fit_ye,
+            formatted_title_ac,
+            fit=False,
+            save=True,
+            base_dir=os.path.join(RUN_DIR, "plots")
+        )
         
         # t_rel_pesado
         xe_r, ye_r, fit_ye_r = distribution_to_plot(res.t_rel_pesado, normal=True)
         formatted_title_rel = format_title_with_suffix("t_{{{rel}_{{w}}}}", model['label'])
         if key == "deterministic":
             # Slices differently for deterministic in original code
-            distribution_plot(xe_r[:-1], ye_r[:-1], fit_ye_r, formatted_title_rel, fit=False, save=True, base_dir=RUN_DIR)
+            distribution_plot(
+                xe_r[:-1],
+                ye_r[:-1],
+                fit_ye_r,
+                formatted_title_rel,
+                fit=False,
+                save=True,
+                base_dir=os.path.join(RUN_DIR, "plots")
+            )
         else:
-            distribution_plot(xe_r[1:], ye_r[1:], fit_ye_r, formatted_title_rel, fit=False, save=True, base_dir=RUN_DIR)
+            distribution_plot(
+                xe_r[1:],
+                ye_r[1:],
+                fit_ye_r,
+                formatted_title_rel,
+                fit=False,
+                save=True,
+                base_dir=os.path.join(RUN_DIR, "plots")
+            )
             
     # --- Summary Logging ---
     for key, model in MODELS_CONFIG.items():
