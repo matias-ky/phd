@@ -447,6 +447,10 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
             cluster_sizes_tot = []
             fractal_index_tot = []
             fractal_indexes_at_peak_tot = []
+            Z_tot = []
+            Z_abs_tot = []
+            Zx_tot = []
+            Zy_tot = []
 
             chunks_range = 2000
 
@@ -564,6 +568,13 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
                 cluster_sizes_tot += cluster_sizes
                 fractal_index_tot += fractal_index_i
                 fractal_indexes_at_peak_tot += fractal_indexes_at_peak
+
+                Z_values, Z_abs_values, Zx_values, Zy_values = system_gradient_values(lista_de_grillas)
+                Z_tot += Z_values.tolist()
+                Z_abs_tot += Z_abs_values.tolist()
+                Zx_tot += Zx_values.tolist()
+                Zy_tot += Zy_values.tolist()
+
                 del lista_de_grillas
                 del lista_de_areas
                 del areas_de_avalanchas
@@ -580,4 +591,19 @@ def simulacion_completa(B, N, Zc, iterations, model, mu=1, sigma=0.001):
         except:
             pass
 
-    return e_lib_tot, e_tot_tot, B_tot, areas_cubiertas_tot, number_of_nodes_at_peak_tot, cantidad_de_nodos_en_avalanchas_tot, number_of_clusters_tot, cluster_sizes_tot, fractal_index_tot, fractal_indexes_at_peak_tot
+    return (
+        e_lib_tot,
+        e_tot_tot,
+        B_tot,
+        areas_cubiertas_tot,
+        number_of_nodes_at_peak_tot,
+        cantidad_de_nodos_en_avalanchas_tot,
+        number_of_clusters_tot,
+        cluster_sizes_tot,
+        fractal_index_tot,
+        fractal_indexes_at_peak_tot,
+        Z_tot,
+        Z_abs_tot,
+        Zx_tot,
+        Zy_tot,
+    )

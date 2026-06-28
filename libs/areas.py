@@ -350,6 +350,53 @@ def number_of_clusters(total_cluster_list):
     return cluster_numbers
 
 
+def system_gradient_values(list_of_grids):
+    """
+    Compute system gradient totals for a list of grids.
+
+    Parameters
+    ----------
+    list_of_grids : list of numpy.ndarray
+        List of grids with boundary padding.
+
+    Returns
+    -------
+    tuple
+        Four numpy arrays containing total gradient values for each grid:
+            - Z : sum of all Z values in the grid.
+            - Z_abs : sum of all absolute Z values in the grid.
+            - Zx : sum of all X-gradient values in the grid.
+            - Zy : sum of all Y-gradient values in the grid.
+    """
+    Z_totals = []
+    Z_abs_totals = []
+    Zx_totals = []
+    Zy_totals = []
+
+    for B in list_of_grids:
+        inner = B[1:-1, 1:-1]
+        neighbors_x = 0.5 * (B[0:-2, 1:-1] + B[2:, 1:-1])
+        neighbors_y = 0.5 * (B[1:-1, 0:-2] + B[1:-1, 2:])
+        neighbors_all = 0.25 * (B[0:-2, 1:-1] + B[2:, 1:-1] + B[1:-1, 0:-2] + B[1:-1, 2:])
+
+        Z = inner - neighbors_all
+        Zx = inner - neighbors_x
+        Zy = inner - neighbors_y
+        Z_abs = np.abs(Z)
+
+        Z_totals.append(np.sum(Z))
+        Z_abs_totals.append(np.sum(Z_abs))
+        Zx_totals.append(np.sum(Zx))
+        Zy_totals.append(np.sum(Zy))
+
+    return (
+        np.array(Z_totals, dtype=np.float32),
+        np.array(Z_abs_totals, dtype=np.float32),
+        np.array(Zx_totals, dtype=np.float32),
+        np.array(Zy_totals, dtype=np.float32),
+    )
+
+
 # def fractal_index(matrix):
 #     """
 #     Calculate the fractal index of a matrix using the box-counting method.

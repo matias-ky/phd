@@ -11,6 +11,7 @@ import datetime
 import time as sys_time
 # pyrefly: ignore [missing-import]
 import numpy as np
+from types import SimpleNamespace
 # pyrefly: ignore [missing-import]
 import matplotlib.pyplot as plt
 
@@ -94,7 +95,11 @@ class SimulationResult:
             self.number_of_clusters,
             self.cluster_sizes,
             self.fractal_index,
-            self.fractal_indexes_at_peak
+            self.fractal_indexes_at_peak,
+            self.Z,
+            self.Z_abs,
+            self.Zx,
+            self.Zy,
         ) = outputs
 
         # Process derived avalanche metrics
@@ -225,6 +230,89 @@ def plot_comparison(datasets, xlabel, ylabel, filename, scale="linear"):
     plt.tight_layout()
     
     # Save the plots inside the run directory
+    pdf_dir = os.path.join(RUN_DIR, "plots", "pdf")
+    png_dir = os.path.join(RUN_DIR, "plots", "png")
+    os.makedirs(pdf_dir, exist_ok=True)
+    os.makedirs(png_dir, exist_ok=True)
+    plt.savefig(os.path.join(pdf_dir, f"{filename}.pdf"))
+    plt.savefig(os.path.join(png_dir, f"{filename}.png"), dpi=300)
+    plt.close()
+
+
+def plot_energy_and_gradients(result, model, filename):
+    """Plot E and system gradient totals in a single vertical panel for one model."""
+    variables = [
+        ("e_lib", r"$E$"),
+        ("Z", r"$Z$"),
+        ("Z_abs", r"$|Z|$"),
+        ("Zx", r"$Z_x$"),
+        ("Zy", r"$Z_y$"),
+    ]
+    fig, axes = plt.subplots(len(variables), 1, sharex=True, figsize=(12, 16))
+
+    for ax, (field_name, ylabel) in zip(axes, variables):
+        data = getattr(result, field_name)
+        if len(data) == 0:
+            continue
+        markevery = max(1, len(data) // 200)
+        ax.plot(
+            data,
+            label=model["name"],
+            linestyle=model["linestyle"],
+            marker=model["marker"],
+            markersize=4,
+            markevery=markevery,
+        )
+        ax.set_ylabel(ylabel)
+        ax.grid(True, alpha=0.3)
+        if field_name == "e_lib":
+            ax.legend(loc="upper right", fontsize="small")
+
+    axes[-1].set_xlabel("Iteración")
+    fig.suptitle(model["name"], y=0.99)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
+
+    pdf_dir = os.path.join(RUN_DIR, "plots", "pdf")
+    png_dir = os.path.join(RUN_DIR, "plots", "png")
+    os.makedirs(pdf_dir, exist_ok=True)
+    os.makedirs(png_dir, exist_ok=True)
+    plt.savefig(os.path.join(pdf_dir, f"{filename}.pdf"))
+    plt.savefig(os.path.join(png_dir, f"{filename}.png"), dpi=300)
+    plt.close()
+
+
+def slice_gradient_result(result, count=None):
+    """Return a shallow sliced result containing only gradient fields."""
+    if count is None:
+        return result
+
+    fields = ["e_lib", "Z", "Z_abs", "Zx", "Zy"]
+    values = {}
+    for field in fields:
+        data = getattr(result, field)
+        values[field] = data[-count:] if len(data) > count else data
+    return SimpleNamespace(**values)
+
+
+def plot_histogram_points(data, key_suffix, title, filename, normal=False, semilog=False, scale=None, fit=False):
+    """Plot histogram data as scatter points instead of bars."""
+    xe, ye, fit_ye = distribution_to_plot(data, normal=normal, semilog=semilog)
+    plt.figure()
+    formatted_title = format_title_with_suffix(title, key_suffix)
+    plt.scatter(xe, ye, c="C0", edgecolors="k", alpha=0.7, label="Histogram points")
+    if scale == "log":
+        plt.yscale("log")
+        plt.xscale("log")
+    if scale == "semilog":
+        plt.yscale("log")
+
+    plt.title(formatted_title)
+    plt.xlabel(r"$" + title + r"$")
+    plt.ylabel(r"PDF($" + title + r"$)")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+
     pdf_dir = os.path.join(RUN_DIR, "plots", "pdf")
     png_dir = os.path.join(RUN_DIR, "plots", "png")
     os.makedirs(pdf_dir, exist_ok=True)
@@ -424,6 +512,26 @@ def main():
             data = getattr(results[key], field_name)
             plot_and_log_distribution(data, model["label"], title_prefix, normal=normal, semilog=semilog, scale=scale, fit=fit)
             
+    # System gradient distributions
+    logging.info("Analyzing system gradients...")
+    plot_ranges = [
+        (None, None),
+        ("last_1000000", 1_000_000),
+        ("last_100000", 100_000),
+    ]
+    for key, model in MODELS_CONFIG.items():
+        if key not in results:
+            continue
+        res = results[key]
+        for suffix, count in plot_ranges:
+            sliced_res = slice_gradient_result(res, count)
+            suffix_str = f"_{suffix}" if suffix else ""
+            plot_energy_and_gradients(sliced_res, model, f"energy_and_gradients_{model['label']}{suffix_str}")
+            plot_histogram_points(sliced_res.Z, model["label"], "Z", f"hist_Z_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
+            plot_histogram_points(sliced_res.Z_abs, model["label"], "Z_{abs}", f"hist_Z_abs_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
+            plot_histogram_points(sliced_res.Zx, model["label"], "Z_x", f"hist_Zx_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
+            plot_histogram_points(sliced_res.Zy, model["label"], "Z_y", f"hist_Zy_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
+
     # E_rel (requires special slicing for deterministic model in original code)
     logging.info("Analyzing E_rel...")
     for key, model in MODELS_CONFIG.items():
