@@ -518,6 +518,8 @@ def main():
         (None, None),
         ("last_1000000", 1_000_000),
         ("last_100000", 100_000),
+        ("last_10000", 10_000),
+        ("last_1000", 1_000),
     ]
     for key, model in MODELS_CONFIG.items():
         if key not in results:
