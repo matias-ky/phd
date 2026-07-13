@@ -20,6 +20,7 @@ from libs.functions import *
 from libs.areas import *
 from libs.analysis import *
 from libs.utils import *
+from libs.aggregation import aggregate_by_lim_a
 
 # Define simulation parameters
 SEED = 7
@@ -126,6 +127,31 @@ class SimulationResult:
         self.t_P = tiempo_entre_picos(self.tes)
         self.t_fi = tiempo_fin_inicio(self.lim_a)
         self.t_ii = tiempo_inicio_inicio(self.lim_a)
+
+        # --- Per-avalanche gradient aggregations (sums and averages) ---
+        res_Z = aggregate_by_lim_a(self.Z, self.lim_a, ops=("sum", "mean"))
+        res_Zabs = aggregate_by_lim_a(self.Z_abs, self.lim_a, ops=("sum", "mean"))
+
+        self.Z_t_fi_sum = res_Z.get("sum")
+        self.Z_t_fi_avg = res_Z.get("mean")
+        self.Z_abs_t_fi_sum = res_Zabs.get("sum")
+        self.Z_abs_t_fi_avg = res_Zabs.get("mean")
+
+        # Alias the same per-avalanche arrays for the other timing names (same ordering)
+        self.Z_t_ii_sum = self.Z_t_fi_sum
+        self.Z_t_P_sum = self.Z_t_fi_sum
+        self.Z_abs_t_ii_sum = self.Z_abs_t_fi_sum
+        self.Z_abs_t_P_sum = self.Z_abs_t_fi_sum
+
+        self.Z_t_ii_avg = self.Z_t_fi_avg
+        self.Z_t_P_avg = self.Z_t_fi_avg
+        self.Z_abs_t_ii_avg = self.Z_abs_t_fi_avg
+        self.Z_abs_t_P_avg = self.Z_abs_t_fi_avg
+
+        # Inform how many empty slices were encountered (should be zero normally)
+        n_empty = int(res_Z.get("n_empty", 0)) + int(res_Zabs.get("n_empty", 0))
+        if n_empty > 0:
+            logging.info("SimulationResult: encountered %d empty avalanche slices when aggregating gradients (inserted NaN).", n_empty)
 
 
 def run_all_simulations(B_initial, N, Zc, iterations):
@@ -320,6 +346,81 @@ def plot_histogram_points(data, key_suffix, title, filename, normal=False, semil
     plt.savefig(os.path.join(pdf_dir, f"{filename}.pdf"))
     plt.savefig(os.path.join(png_dir, f"{filename}.png"), dpi=300)
     plt.close()
+
+
+def compute_and_plot_correlation(result, model, timing_attr, grad_sum_attr, grad_avg_attr, grad_abs_sum_attr, grad_abs_avg_attr, suffix_str=""):
+    """Compute Pearson correlation and plot scatter for timing vs gradient aggregates."""
+    timing = getattr(result, timing_attr, None)
+    grad_sum = getattr(result, grad_sum_attr, None)
+    grad_avg = getattr(result, grad_avg_attr, None)
+    grad_abs_sum = getattr(result, grad_abs_sum_attr, None)
+    grad_abs_avg = getattr(result, grad_abs_avg_attr, None)
+
+    pairs = [
+        (timing, grad_sum, f"{timing_attr}_vs_{grad_sum_attr}"),
+        (timing, grad_avg, f"{timing_attr}_vs_{grad_avg_attr}"),
+        (timing, grad_abs_sum, f"{timing_attr}_vs_{grad_abs_sum_attr}"),
+        (timing, grad_abs_avg, f"{timing_attr}_vs_{grad_abs_avg_attr}"),
+    ]
+
+    for x, y, name in pairs:
+        if x is None or y is None:
+            continue
+        x = np.asarray(x)
+        y = np.asarray(y)
+        n = min(len(x), len(y))
+        if n == 0:
+            continue
+        x = x[:n]
+        y = y[:n]
+        mask = (~np.isnan(x)) & (~np.isnan(y))
+        if np.sum(mask) < 3:
+            continue
+        xm = x[mask]
+        ym = y[mask]
+        try:
+            r = np.corrcoef(xm, ym)[0,1]
+        except Exception:
+            r = np.nan
+
+        plt.figure(figsize=(6,4))
+        plt.scatter(xm, ym, alpha=0.6, edgecolors='k')
+        plt.xlabel(timing_attr)
+        plt.ylabel(name)
+        plt.title(f"{model['name']} — {name} (r={r:.3f})")
+        plt.grid(True)
+        plt.tight_layout()
+
+        pdf_dir = os.path.join(RUN_DIR, "plots", "pdf")
+        png_dir = os.path.join(RUN_DIR, "plots", "png")
+        os.makedirs(pdf_dir, exist_ok=True)
+        os.makedirs(png_dir, exist_ok=True)
+        fname = f"corr_{model['label']}_{name}{suffix_str}"
+        plt.savefig(os.path.join(pdf_dir, f"{fname}.pdf"))
+        plt.savefig(os.path.join(png_dir, f"{fname}.png"), dpi=300)
+        plt.close()
+
+
+def plot_gradient_timing_correlations(results):
+    """Generate correlation scatter plots between timing arrays and aggregated gradients."""
+    timing_map = [
+        ("t_fi", "Z_t_fi_sum", "Z_t_fi_avg", "Z_abs_t_fi_sum", "Z_abs_t_fi_avg"),
+        ("t_ii", "Z_t_ii_sum", "Z_t_ii_avg", "Z_abs_t_ii_sum", "Z_abs_t_ii_avg"),
+        ("t_P", "Z_t_P_sum", "Z_t_P_avg", "Z_abs_t_P_sum", "Z_abs_t_P_avg"),
+    ]
+
+    for key, model in MODELS_CONFIG.items():
+        if key not in results:
+            continue
+        res = results[key]
+        # Full-range (no suffix)
+        for timing_attr, gsum, gavg, gasum, gaavg in timing_map:
+            compute_and_plot_correlation(res, model, timing_attr, gsum, gavg, gasum, gaavg, suffix_str="")
+        # Also check per-range variants if present (e.g., attributes exist with suffixes like _last_1000)
+        suffixes = ["_last_1000000", "_last_100000", "_last_10000", "_last_1000"]
+        for s in suffixes:
+            for timing_attr, gsum, gavg, gasum, gaavg in timing_map:
+                compute_and_plot_correlation(res, model, timing_attr, gsum + s, gavg + s, gasum + s, gaavg + s, suffix_str=s)
 
 
 def main():
@@ -533,6 +634,10 @@ def main():
             plot_histogram_points(sliced_res.Z_abs, model["label"], "Z_{abs}", f"hist_Z_abs_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
             plot_histogram_points(sliced_res.Zx, model["label"], "Z_x", f"hist_Zx_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
             plot_histogram_points(sliced_res.Zy, model["label"], "Z_y", f"hist_Zy_{model['label']}{suffix_str}", normal=True, scale=None, fit=False)
+
+    # Correlations between gradients and waiting times
+    logging.info("Analyzing correlations between gradients and timing...")
+    plot_gradient_timing_correlations(results)
 
     # E_rel (requires special slicing for deterministic model in original code)
     logging.info("Analyzing E_rel...")
