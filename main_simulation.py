@@ -722,6 +722,22 @@ def main():
             continue
         logging.info("Number of avalanches analyzed %s: %d", model["name"], len(results[key].T))
 
+    # --- Guardar datos para análisis externo ---
+    logging.info("Guardando datos numéricos para análisis externo...")
+    data_to_save = {}
+    for key in results:
+        res = results[key]
+        data_to_save[f"{key}_e_lib"] = np.array(res.e_lib[-1_000_000:])  # Save last 1 million steps for e_lib
+        data_to_save[f"{key}_Z"] = np.array(res.Z[-1_000_000:])  # Save last 1 million steps for Z
+        data_to_save[f"{key}_Z_abs"] = np.array(res.Z_abs[-1_000_000:])  # Save last 1 million steps for Z_abs
+        data_to_save[f"{key}_Zx"] = np.array(res.Zx[-1_000_000:])  # Save last 1 million steps for Zx
+        data_to_save[f"{key}_Zy"] = np.array(res.Zy[-1_000_000:])  # Save last 1 million steps for Zy
+
+    save_path = os.path.join(RUN_DIR, "simulation_data.npz")
+    np.savez_compressed(save_path, **data_to_save)
+    logging.info("Datos guardados exitosamente en: %s", save_path)
+
+
 
 if __name__ == "__main__":
     main()
