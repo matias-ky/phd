@@ -2,3 +2,7 @@ plots/
 venv/
 results/
 runs/
+results_r0iter/
+__pycache__/
+*.pyc
+.DS_Store
