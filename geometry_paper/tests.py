@@ -21,6 +21,21 @@ def test_mle():
     an.validate_mle()
 
 
+def test_uncertainties():
+    """Fast windowed MLE == analysis.mle_exponent, and the grid recovers a pure power law."""
+    import uncertainties as un
+    rng = np.random.default_rng(2)
+    a_true, lo, hi = 1.6, 10.0, 1e4
+    u = rng.random(200000)
+    x = (lo ** (1 - a_true) + u * (hi ** (1 - a_true) - lo ** (1 - a_true))) ** (1 / (1 - a_true))
+    S = un.SortedSample(x)
+    d = abs(un.mle_window(S, 20, 2000) + an.mle_exponent(x, 20, 2000)[0])
+    f = un.exponent_with_errors(x, 20, 2000)
+    print(f"  [uncertainties] |fast - reference| = {d:.1e}; alpha = {f['alpha']:.3f} "
+          f"+/- {f['err']:.3f} (+/- {f['err_sys']:.3f}) for a pure power law -{a_true}")
+    assert d < 1e-5 and abs(f["alpha"] + a_true) < 0.02 and f["err_sys"] < 0.03
+
+
 def _det_state(N=32, eps=1e-5, r0pn=True):
     B = np.zeros((N + 2, N + 2))
     md.seed_numba(3)
@@ -79,6 +94,6 @@ if __name__ == "__main__":
     if not check_grid_dir():      # test_resume_identical runs run_simulations.py on N = 64
         print("[tests] Tests not run: phd/initial_grids/ is required.", file=sys.stderr)
         sys.exit(1)
-    for t in (test_box_counting, test_mle, test_energy_deterministic, test_resume_identical):
+    for t in (test_box_counting, test_mle, test_uncertainties, test_energy_deterministic, test_resume_identical):
         print(t.__name__); t()
     print("ALL TESTS PASSED")

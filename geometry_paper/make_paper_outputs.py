@@ -27,6 +27,7 @@ from matplotlib.gridspec import GridSpec
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import analysis as an                                   # noqa: E402
+import uncertainties as un                              # noqa: E402
 from run_simulations import config_tag, SIZES, EPSILONS  # noqa: E402
 
 # ----------------------------------------------------------------------------- #
@@ -129,17 +130,41 @@ def _window(N, key, shift=1.0):
     return max(AREA_FLOOR, lo * N * N * shift), hi * N * N * shift
 
 
-def area_fit(x, N, n_boot, key="A_t"):
-    """Truncated power-law MLE on the fixed window; err = bootstrap std (statistical),
-    err_sys = max change of alpha when the window is shifted by a factor 2 up or down."""
+def area_fit(x, N, n_boot=None, key="A_t"):
+    """Truncated power-law MLE on the fixed window (uncertainties.py):
+    err = batch-means error over 20 blocks in time (statistical),
+    err_sys = half range of alpha when x_min and x_max are varied independently by
+    factors 1/2 ... 2 (removing/adding up to ~3 log-bins at each end of the window)."""
     lo, hi = _window(N, key)
-    f = an.fit_power_law(x, xmax=hi, xmin_fixed=lo, n_boot=n_boot, seed=1)
-    alts = []
-    for sh in (0.5, 2.0):
-        l2, h2 = _window(N, key, sh)
-        alts.append(an.fit_power_law(x, xmax=h2, xmin_fixed=l2, n_boot=0)["alpha"])
-    f["err_sys"] = float(np.nanmax(np.abs(np.array(alts) - f["alpha"])))
-    return f
+    return un.exponent_with_errors(x, lo, hi)
+
+
+def energy_fit(E):
+    """x_min from the KS criterion (Clauset et al. 2009), no upper bound; err_sys from
+    x_min * (1/2 ... 2) and x_max in {inf, 99.99%, 99.9% quantile}."""
+    E = np.asarray(E, float)
+    xmin = an.fit_power_law(E, n_boot=0)["xmin"]
+    q = [np.inf, float(np.quantile(E, 0.9999)), float(np.quantile(E, 0.999))]
+    return un.exponent_with_errors(E, xmin, np.inf, sys_hi=q)
+
+
+# Fixed windows in absolute area (same for all N): diagnostic of the N dependence.
+ABS_WINDOWS = {"A_t": [(30, 300), (100, 1000), (300, 3000)], "A_P": [(30, 300), (60, 600)]}
+
+
+def absolute_window_fits(R, sizes):
+    res = {}
+    for model, e in [("LH91", 0.0), ("DET", REF_EPS)]:
+        for key in ("A_t", "A_P"):
+            for lo, hi in ABS_WINDOWS[key]:
+                for N in sizes:
+                    # only windows well below the cutoff of that lattice
+                    if hi > WINDOW[key][1] * N * N * 1.01 or not R.has(model, N, e):
+                        continue
+                    x = R.At(model, N, e) if key == "A_t" else R.AP(model, N, e)
+                    f = un.exponent_with_errors(x, lo, hi)
+                    res[f"{config_tag(model, N, e)}|{key}|{lo}-{hi}"] = f
+    return res
 
 
 def all_fits(R, sizes, n_boot):
@@ -150,9 +175,9 @@ def all_fits(R, sizes, n_boot):
                 continue
             a = R.av(model, N, eps)
             fits[(model, N, eps)] = {
-                "A_t": area_fit(R.At(model, N, eps), N, n_boot, "A_t"),
-                "A_P": area_fit(R.AP(model, N, eps), N, n_boot, "A_P"),
-                "E": an.fit_power_law(a["E"], n_boot=n_boot, seed=1),
+                "A_t": area_fit(R.At(model, N, eps), N, key="A_t"),
+                "A_P": area_fit(R.AP(model, N, eps), N, key="A_P"),
+                "E": energy_fit(a["E"]),
                 "n_avalanches": int(len(a["E"])),
             }
             print(f"  fit {config_tag(model, N, eps)}: a_At={fits[(model, N, eps)]['A_t']['alpha']:.3f}"
@@ -168,7 +193,7 @@ def plot_pdf_with_fit(ax, x, fit, color, label, integer):
     ax.loglog(xc, pdf, "o", mfc="none", mec=color, ms=6, label=label)
     xs = np.logspace(np.log10(fit["xmin"]), np.log10(fit["xmax"] or xc.max()), 50)
     ax.loglog(xs, an.power_law_curve(fit, x, xs), "--", color="k", lw=1.6,
-              label=rf"MLE fit: $\alpha={fit['alpha']:.2f}\pm{max(fit['err'], 0.005):.2f}$")
+              label=rf"MLE fit: $\alpha={fit['alpha']:.2f}\pm{up2(total_err(fit)):.2f}$")
 
 
 def fig_E(R, fits, out, N=None, eps=REF_EPS):
@@ -178,6 +203,32 @@ def fig_E(R, fits, out, N=None, eps=REF_EPS):
     plot_pdf_with_fit(ax, x, fits[("DET", N, eps)]["E"], C_DET, rf"Deterministic, $\epsilon={eps_tex(eps)}$", False)
     ax.set_xlabel(r"$E$ [$e_0$]"); ax.set_ylabel(r"PDF($E$)"); ax.legend(loc="lower left")
     save(fig, out, "fig_E_det")
+
+
+def fig_local_slope(R, out, sizes, eps=REF_EPS):
+    """Local MLE exponent in sliding windows of half a decade, vs absolute area, for all N.
+    Grey band: fitting window of the reference lattice. Curves stop at the upper bound of
+    the fitting window of each N (beyond it the finite-size cutoff dominates)."""
+    cent = 10 ** np.arange(1.25, 4.6, 0.125)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), sharey=True)
+    for ax, key, lab in zip(axes, ("A_t", "A_P"), (r"A^{t}", r"A^{P}")):
+        for model, e, c in [("LH91", 0.0, C_LH), ("DET", eps, C_DET)]:
+            for N in sizes:
+                if not R.has(model, N, e):
+                    continue
+                x = R.At(model, N, e) if key == "A_t" else R.AP(model, N, e)
+                m = cent * 10 ** 0.25 <= _window(N, key)[1]
+                ax.semilogx(cent[m], un.local_exponent(x, cent[m]), MK_N[N] + "-", color=c,
+                            mfc="none", ms=5, lw=1,
+                            label=f"{'LH91' if model == 'LH91' else 'Det.'}, N = {N}")
+        lo, hi = _window(REF_N, key)
+        ax.axvspan(lo, hi, color="0.85", zorder=0)
+        ax.set_xlabel(rf"${lab}$"); ax.set_ylim(-2.2, -1.2)
+        ax.set_title(f"({'a' if key == 'A_t' else 'b'})", loc="left", fontsize=11)
+    axes[0].set_ylabel(r"local exponent $\alpha_{\rm loc}$")
+    axes[0].legend(ncol=2, fontsize=8, loc="lower right")
+    fig.tight_layout()
+    save(fig, out, "fig_local_slope")
 
 
 def fig_area_pdfs(R, fits, out, key, N=None, eps=REF_EPS):
@@ -390,8 +441,19 @@ def fmt(v, e):
     return rf"${v:.2f}\pm{max(e, 0.005):.2f}$"
 
 
+def up2(e):
+    """uncertainty rounded UP to two decimals (never quoted as 0.00)."""
+    return max(np.ceil(e * 100 - 1e-9) / 100, 0.01)
+
+
+def total_err(f):
+    """single uncertainty quoted in the paper: statistical (batch means) and fitting-range
+    (systematic) uncertainties added in quadrature; in practice it equals the latter."""
+    return float(np.hypot(f["err"], f["err_sys"]))
+
+
 def fmt_sys(f):
-    return rf"${f['alpha']:.2f}\pm{max(f['err'], 0.005):.2f}\,(\pm{f['err_sys']:.2f})$"
+    return rf"${f['alpha']:.2f}\pm{up2(total_err(f)):.2f}$"
 
 
 def write_tables(R, fits, out, sizes):
@@ -408,7 +470,7 @@ def write_tables(R, fits, out, sizes):
             L.append(f"{N} & {'LH91' if model == 'LH91' else 'Det.'} & "
                      f"{'--' if model == 'LH91' else '$' + eps_tex(e) + '$'} & "
                      f"{fmt_sys(f['A_t'])} & {fmt_sys(f['A_P'])} & "
-                     f"{fmt(f['E']['alpha'], f['E']['err'])} \\\\")
+                     f"{fmt_sys(f['E'])} \\\\")
             numbers["fits"][config_tag(model, N, e)] = {
                 k: {kk: (float(vv) if vv is not None else None) for kk, vv in f[k].items()}
                 for k in ("A_t", "A_P", "E")}
@@ -470,7 +532,7 @@ def main():
     ap.add_argument("--lh-results", default=None, help="folder with the LH91 runs (default: --results)")
     ap.add_argument("--out", default=None, help="output folder (default <results>/paper_<area>)")
     ap.add_argument("--sizes", type=int, nargs="+", default=SIZES)
-    ap.add_argument("--boot", type=int, default=100, help="bootstrap resamples for fit errors")
+    ap.add_argument("--boot", type=int, default=100, help="(unused since v4: errors from uncertainties.py; kept for compatibility)")
     ap.add_argument("--ref-n", type=int, default=REF_N, help="lattice used in the single-N figures")
     a = ap.parse_args()
     REF_N = a.ref_n
@@ -496,6 +558,10 @@ def main():
     fig_E(R, fits, out)
     fig_area_pdfs(R, fits, out, "A_t")
     fig_area_pdfs(R, fits, out, "A_P")
+    fig_local_slope(R, out, sizes)
+    nj = os.path.join(out, "numbers.json"); numbers = json.load(open(nj))
+    numbers["absolute_windows"] = absolute_window_fits(R, sizes)
+    json.dump(numbers, open(nj, "w"), indent=1)
     fig_avalanche_examples(R, out)
     fig_boxcounting(R, out)
     fig_D_distributions(R, out)
